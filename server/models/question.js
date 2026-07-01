@@ -20,6 +20,6 @@ const questionschema = mongoose.Schema(
       },
     ],
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 export default mongoose.model("question", questionschema);

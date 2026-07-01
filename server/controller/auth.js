@@ -2,6 +2,13 @@ import mongoose from "mongoose";
 import user from "../models/auth.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+
+const sanitizeUser = (doc) => {
+  const obj = doc.toObject ? doc.toObject() : doc;
+  delete obj.password;
+  return obj;
+};
+
 export const Signup = async (req, res) => {
   const { name, email, password } = req.body;
   try {
@@ -20,12 +27,13 @@ export const Signup = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    res.status(200).json({ data: newuser, token });
+    res.status(200).json({ data: sanitizeUser(newuser), token });
   } catch (error) {
     res.status(500).json("something went wrong..");
     return;
   }
 };
+
 export const Login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -46,21 +54,23 @@ export const Login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    res.status(200).json({ data: exisitinguser, token });
+    res.status(200).json({ data: sanitizeUser(exisitinguser), token });
   } catch (error) {
     res.status(500).json("something went wrong..");
     return;
   }
 };
+
 export const getallusers = async (req, res) => {
   try {
-    const alluser = await user.find();
+    const alluser = await user.find().select("-password");
     res.status(200).json({ data: alluser });
   } catch (error) {
     res.status(500).json("something went wrong..");
     return;
   }
 };
+
 export const updateprofile = async (req, res) => {
   const { id: _id } = req.params;
   const { name, about, tags } = req.body.editForm;
@@ -72,7 +82,7 @@ export const updateprofile = async (req, res) => {
       _id,
       { $set: { name: name, about: about, tags: tags } },
       { new: true }
-    );
+    ).select("-password");
     res.status(200).json({ data: updateprofile });
   } catch (error) {
     console.log(error);

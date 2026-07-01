@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
       });
       const { data, token } = res.data;
       localStorage.setItem("user", JSON.stringify({ ...data, token }));
-      setUser(data);
+      setUser({ ...data, token });
       toast.success("Signup Successful");
       return true;
     } catch (error) {
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
       });
       const { data, token } = res.data;
       localStorage.setItem("user", JSON.stringify({ ...data, token }));
-      setUser(data);
+      setUser({ ...data, token });
       toast.success("Login Successful");
       return true;
     } catch (error) {

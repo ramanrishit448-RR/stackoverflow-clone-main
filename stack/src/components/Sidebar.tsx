@@ -6,7 +6,7 @@ import {
   FileText,
   Home,
   MessageSquare,
-  MessageSquareIcon,
+  Rss,
   Tag,
   Trophy,
   Users,
@@ -28,19 +28,19 @@ const Sidebar = ({ isopen }: any) => {
           <ul className="space-y-1">
             <li>
               <Link
-                href="/"
+                href="/feed"
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
-                <Home className="w-4 h-4 mr-2 lg:mr-3" />
-                Home
+                <Rss className="w-4 h-4 mr-2 lg:mr-3" />
+                Community Feed
               </Link>
             </li>
             <li>
               <Link
-                href="/questions"
+                href="/"
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
-                <MessageSquareIcon className="w-4 h-4 mr-2 lg:mr-3" />
+                <Home className="w-4 h-4 mr-2 lg:mr-3" />
                 Questions
               </Link>
             </li>
@@ -76,7 +76,7 @@ const Sidebar = ({ isopen }: any) => {
             </li>
             <li>
               <Link
-                href="#"
+                href="/feed/bookmarks"
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Bookmark className="w-4 h-4 mr-2 lg:mr-3" />

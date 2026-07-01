@@ -19,26 +19,7 @@ import { Calendar, Edit, Plus, X } from "lucide-react";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-const getUserData = (id: string) => {
-  const users = {
-    "1": {
-      id: 1,
-      name: "John Doe",
-      joinDate: "2019-03-15",
-      about:
-        "Full-stack developer with 8+ years of experience in JavaScript, React, and Node.js. Passionate about clean code and helping others learn programming. I enjoy working on open-source projects and contributing to the developer community.",
-      tags: [
-        "javascript",
-        "react",
-        "node.js",
-        "typescript",
-        "python",
-        "mongodb",
-      ],
-    },
-  };
-  return users[id as keyof typeof users] || users["1"];
-};
+
 const index = () => {
   const { user } = useAuth();
   const router = useRouter();
@@ -47,11 +28,13 @@ const index = () => {
   const [loading, setloading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
-    name: users?.name || "",
-    about: users?.about || "",
-    tags: users?.tags || [],
+    name: "",
+    about: "",
+    tags: [] as string[],
   });
   const [newTag, setNewTag] = useState("");
+  const [following, setFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
 
   useEffect(() => {
     const fetchuser = async () => {
@@ -59,6 +42,11 @@ const index = () => {
         const res = await axiosInstance.get("/user/getalluser");
         const matcheduser = res.data.data.find((u: any) => u._id === id);
         setusers(matcheduser);
+        if (id && user) {
+          const followRes = await axiosInstance.get(`/follow/${id}/follow-status`);
+          setFollowing(followRes.data.data.following);
+          setFollowerCount(followRes.data.data.followerCount);
+        }
       } catch (error) {
         console.log(error);
       } finally {
@@ -66,7 +54,29 @@ const index = () => {
       }
     };
     fetchuser();
-  }, [id]);
+  }, [id, user]);
+
+  const handleFollow = async () => {
+    if (!user) {
+      router.push("/auth");
+      return;
+    }
+    try {
+      if (following) {
+        await axiosInstance.delete(`/follow/${id}/follow`);
+        setFollowing(false);
+        setFollowerCount((c) => Math.max(0, c - 1));
+        toast.info("Unfollowed");
+      } else {
+        await axiosInstance.post(`/follow/${id}/follow`);
+        setFollowing(true);
+        setFollowerCount((c) => c + 1);
+        toast.success("Following!");
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to update follow");
+    }
+  };
   if (loading) {
     return (
       <Mainlayout>
@@ -140,18 +150,40 @@ const index = () => {
                 </h1>
               </div>
 
-              {isOwnProfile && (
-                <Dialog open={isEditing} onOpenChange={setIsEditing}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="flex items-center gap-2 bg-transparent"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Edit Profile
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white text-gray-900">
+              <div className="flex gap-2">
+                {!isOwnProfile && user && (
+                  <Button
+                    onClick={handleFollow}
+                    className={
+                      following
+                        ? "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                        : "bg-orange-500 hover:bg-orange-600"
+                    }
+                  >
+                    {following ? "Following" : "Follow"}
+                  </Button>
+                )}
+                {isOwnProfile && (
+                  <Dialog open={isEditing} onOpenChange={(open) => {
+                      if (open) {
+                        setEditForm({
+                          name: users?.name || "",
+                          about: users?.about || "",
+                          tags: users?.tags || [],
+                        });
+                      }
+                      setIsEditing(open);
+                    }}>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="flex items-center gap-2 bg-transparent"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Edit Profile
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white text-gray-900">
                     <DialogHeader>
                       <DialogTitle>Edit Profile</DialogTitle>
                     </DialogHeader>
@@ -265,7 +297,8 @@ const index = () => {
                     </div>
                   </DialogContent>
                 </Dialog>
-              )}
+                )}
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
               <div className="flex items-center">
@@ -273,6 +306,7 @@ const index = () => {
                 Member since{" "}
                 {new Date(users.joinDate).toISOString().split("T")[0]}
               </div>
+              <span>{followerCount} followers</span>
             </div>
             <div className="flex flex-wrap items-center space-x-6 text-sm">
               <div className="flex items-center">
@@ -315,7 +349,7 @@ const index = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {users.tags.map((tag: string) => (
+                  {(users.tags || []).map((tag: string) => (
                     <div
                       key={tag}
                       className="flex items-center justify-between"

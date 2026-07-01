@@ -1,4 +1,5 @@
 import { useAuth } from "@/lib/AuthContext";
+import NotificationDropdown from "./feed/NotificationDropdown";
 import { Menu, Search } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -62,6 +63,15 @@ const Navbar = ({ handleslidein }: any) => {
             </Link>
           ) : (
             <>
+              {user?.role === "admin" && (
+                <Link
+                  href="/admin"
+                  className="text-sm font-medium text-red-600 border border-red-300 px-3 py-1.5 rounded hover:bg-red-50 transition"
+                >
+                  Admin
+                </Link>
+              )}
+              <NotificationDropdown />
               <Link
                 href={`/users/${user._id}`}
                 className="flex items-center justify-center bg-orange-600 text-white text-sm font-semibold w-9 h-9 rounded-full"

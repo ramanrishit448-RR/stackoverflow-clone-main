@@ -27,11 +27,9 @@ const index = () => {
       toast.error("ALL Fields are required");
       return;
     }
-    try {
-      await Login(form);
+    const success = await Login(form);
+    if (success) {
       router.push("/");
-    } catch (error) {
-      console.log(error);
     }
   };
   return (

@@ -24,7 +24,7 @@ const Mainlayout = ({ children }: MainlayoutProps) => {
       <div className="flex max-w-full py-1">
         <Sidebar isopen={sidebarOpen} />
         <main className="flex-1 min-w-0 p-4 lg:p-6 bg-white">{children}</main>
-        <div className="hidden lg:block border-1 borde-gray-200">
+        <div className="hidden lg:block border-l border-gray-200">
           <RightSideBar />
         </div>
       </div>
