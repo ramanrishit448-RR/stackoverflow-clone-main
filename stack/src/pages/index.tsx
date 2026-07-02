@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-
 export default function Home() {
   const [question, setquestion] = useState<any>(null);
   const [loading, setloading] = useState(true);
@@ -51,6 +50,50 @@ export default function Home() {
             Ask Question
           </button>
         </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 mb-6">
+          <Link
+            href="/chat"
+            className="group block rounded-3xl border border-gray-200 bg-white p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition"
+          >
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <p className="text-sm text-gray-500">Instant help</p>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Chat with mentors
+                </h2>
+              </div>
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                💬
+              </span>
+            </div>
+            <p className="text-sm text-gray-600">
+              Jump into a friendly chat space for quick help, code tips, and
+              status updates.
+            </p>
+          </Link>
+          <Link
+            href="/challenges"
+            className="group block rounded-3xl border border-gray-200 bg-white p-5 shadow-sm hover:border-orange-300 hover:shadow-md transition"
+          >
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <p className="text-sm text-gray-500">Sharpen skills</p>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Explore challenges
+                </h2>
+              </div>
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-orange-50 text-orange-600">
+                🏆
+              </span>
+            </div>
+            <p className="text-sm text-gray-600">
+              Solve challenges, earn badges, and practice with curated tasks
+              across development topics.
+            </p>
+          </Link>
+        </div>
+
         <div className="w-full">
           <div className="flex flex-col sm:flex-row items-start sm:items-center mb-4 text-sm gap-2 sm:gap-4">
             <span className="text-gray-600">{question.length} questions</span>
@@ -100,9 +143,7 @@ export default function Home() {
                         {question.noofanswer}
                       </div>
                       <div className="text-xs">
-                        {question.noofanswer === 1
-                          ? "answer"
-                          : "answers"}
+                        {question.noofanswer === 1 ? "answer" : "answers"}
                       </div>
                     </div>
                   </div>
@@ -146,7 +187,10 @@ export default function Home() {
                           </span>
                         </Link>
 
-                        <span>asked {new Date(question.askedon).toLocaleDateString()}</span>
+                        <span>
+                          asked{" "}
+                          {new Date(question.askedon).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
                   </div>

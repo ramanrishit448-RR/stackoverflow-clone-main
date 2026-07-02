@@ -15,13 +15,13 @@ import Link from "next/link";
 import React from "react";
 import { Badge } from "./ui/badge";
 
-const Sidebar = ({ isopen }: any) => {
+const Sidebar = ({ isopen, onClose }: any) => {
   return (
-    <div>
+    <div className="md:relative">
       <aside
         className={cn(
-          " top-[53px]  w-48 lg:w-64 min-h-screen bg-white shadow-sm border-r transition-transform duration-200 ease-in-out md:translate-x-0",
-          isopen ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-[53px] left-0 z-40 w-64 min-h-screen bg-white shadow-lg border-r transition-transform duration-200 ease-in-out md:static md:translate-x-0 md:w-64",
+          isopen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
       >
         <nav className="p-2 lg:p-4">
@@ -29,6 +29,7 @@ const Sidebar = ({ isopen }: any) => {
             <li>
               <Link
                 href="/feed"
+                onClick={onClose}
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Rss className="w-4 h-4 mr-2 lg:mr-3" />
@@ -38,6 +39,7 @@ const Sidebar = ({ isopen }: any) => {
             <li>
               <Link
                 href="/"
+                onClick={onClose}
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Home className="w-4 h-4 mr-2 lg:mr-3" />
@@ -46,7 +48,8 @@ const Sidebar = ({ isopen }: any) => {
             </li>
             <li>
               <Link
-                href="#"
+                href="/ai-assist"
+                onClick={onClose}
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Bot className="w-4 h-4 mr-2 lg:mr-3" />
@@ -59,6 +62,7 @@ const Sidebar = ({ isopen }: any) => {
             <li>
               <Link
                 href="/tags"
+                onClick={onClose}
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Tag className="w-4 h-4 mr-2 lg:mr-3" />
@@ -68,6 +72,7 @@ const Sidebar = ({ isopen }: any) => {
             <li>
               <Link
                 href="/users"
+                onClick={onClose}
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Users className="w-4 h-4 mr-2 lg:mr-3" />
@@ -77,6 +82,7 @@ const Sidebar = ({ isopen }: any) => {
             <li>
               <Link
                 href="/feed/bookmarks"
+                onClick={onClose}
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Bookmark className="w-4 h-4 mr-2 lg:mr-3" />
@@ -85,7 +91,8 @@ const Sidebar = ({ isopen }: any) => {
             </li>
             <li>
               <Link
-                href="#"
+                href="/challenges"
+                onClick={onClose}
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Trophy className="w-4 h-4 mr-2 lg:mr-3" />
@@ -100,7 +107,8 @@ const Sidebar = ({ isopen }: any) => {
             </li>
             <li>
               <Link
-                href="#"
+                href="/chat"
+                onClick={onClose}
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <MessageSquare className="w-4 h-4 mr-2 lg:mr-3" />
@@ -109,17 +117,18 @@ const Sidebar = ({ isopen }: any) => {
             </li>
             <li>
               <Link
-                href="#"
+                href="/articles"
+                onClick={onClose}
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <FileText className="w-4 h-4 mr-2 lg:mr-3" />
                 Articles
               </Link>
             </li>
-
             <li>
               <Link
-                href="#"
+                href="/companies"
+                onClick={onClose}
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Building className="w-4 h-4 mr-2 lg:mr-3" />
