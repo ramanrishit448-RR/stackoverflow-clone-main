@@ -16,13 +16,14 @@ export const AuthProvider = ({ children }) => {
   const [loading, setloading] = useState(false);
   const [error, seterror] = useState(null);
 
-  const Signup = async ({ name, email, password }) => {
+  const Signup = async ({ name, email, password, phone }) => {
     setloading(true);
     seterror(null);
     try {
       const res = await axiosInstance.post("/user/signup", {
         name,
         email,
+        phone,
         password,
       });
       const { data, token } = res.data;
@@ -57,9 +58,7 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (error) {
       const msg =
-        error.response?.data?.message ||
-        error.response?.data ||
-        "Login failed";
+        error.response?.data?.message || error.response?.data || "Login failed";
       seterror(msg);
       toast.error(msg);
       return false;

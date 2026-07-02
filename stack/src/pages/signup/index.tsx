@@ -18,7 +18,12 @@ import { toast } from "react-toastify";
 export default function SignUpPage() {
   const router = useRouter();
   const { Signup, loading } = useAuth();
-  const [form, setform] = useState({ name: "", email: "", password: "" });
+  const [form, setform] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+  });
   const handleChange = (e: any) => {
     setform({ ...form, [e.target.id]: e.target.value });
   };
@@ -137,6 +142,18 @@ export default function SignUpPage() {
                 />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="phone" className="text-sm">
+                  Phone
+                </Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  value={form.phone}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm">
                   Password
                 </Label>
@@ -147,8 +164,8 @@ export default function SignUpPage() {
                   onChange={handleChange}
                 />
                 <p className="text-xs text-gray-600">
-                  Passwords must contain at least eight characters, including at
-                  least 1 letter and 1 number.
+                  Passwords must contain at least eight characters and contain
+                  letters only.
                 </p>
               </div>
 

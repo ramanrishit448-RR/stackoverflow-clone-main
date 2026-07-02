@@ -140,7 +140,10 @@ const index = () => {
                 {loading ? "loading" : "Log in"}
               </Button>
               <div className="text-center text-sm">
-                <Link href="#" className="text-blue-600 hover:underline">
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-blue-600 hover:underline"
+                >
                   Forgot your password?
                 </Link>
               </div>

@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const userschema = mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
+  phone: { type: String },
   password: { type: String, required: true },
   about: { type: String },
   tags: { type: [String] },
@@ -13,5 +14,6 @@ const userschema = mongoose.Schema({
   isSuspended: { type: Boolean, default: false },
   suspendedUntil: { type: Date },
   violationCount: { type: Number, default: 0 },
+  lastForgotPasswordRequest: { type: Date },
 });
 export default mongoose.model("user", userschema);
