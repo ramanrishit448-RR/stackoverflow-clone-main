@@ -9,6 +9,7 @@ This repository contains a full-stack StackOverflow clone, built and refined as 
 ## 🚀 Tech Stack
 
 ### Backend
+
 - **Core**: Node.js & Express.js
 - **Database**: MongoDB (via Mongoose ODM)
 - **Security & Authentication**: JWT (JSON Web Tokens) & Bcrypt.js
@@ -16,6 +17,7 @@ This repository contains a full-stack StackOverflow clone, built and refined as 
 - **Hot Reloading**: Nodemon
 
 ### Frontend
+
 - **Framework**: Next.js 15 (Pages Router)
 - **Styling**: TailwindCSS & Vanilla CSS
 - **Components**: shadcn/ui components (Radix UI primitives)
@@ -85,26 +87,45 @@ This repository contains a full-stack StackOverflow clone, built and refined as 
    - Access-controlled dashboards for admin roles.
    - Review reported posts with tools to dismiss reports, remove inappropriate content, or suspend offenders.
 
+7. **Mobile-first responsive UI**:
+   - Responsive layouts for mobile and tablet screens.
+   - Sidebar navigation switches to a slide-in menu on smaller viewports.
+   - Homepage includes mobile-friendly cards for feature discovery.
+
+8. **Chat & Challenges experience**:
+   - Added a `Chat` page for quick community support and conversational help.
+   - Added a `Challenges` page for practice tasks, learning prompts, and badge-style challenges.
+   - Homepage cards highlight chat and challenge experiences.
+
+9. **Chat & Challenges experience**:
+   - New `Chat` page for quick support, code help, and conversational guidance.
+   - New `Challenges` page to explore practice tasks with badges and step-by-step prompts.
+
 ---
 
 ## ⚙️ How to Run Locally
 
 ### Prerequisites
+
 - Node.js installed on your machine.
 - MongoDB Server running locally on standard port `27017` (or configured via environment variables).
 
 ### 1. Setup Backend
+
 ```bash
 cd server
 npm install
 npm start
 ```
+
 Make sure `.env` is configured (defaults are provided in the folder).
 
 ### 2. Setup Frontend
+
 ```bash
 cd ../stack
 npm install
 npm run dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000) on your web browser.
