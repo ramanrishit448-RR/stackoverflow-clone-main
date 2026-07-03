@@ -126,7 +126,7 @@ export const getallusers = async (req, res) => {
 
 export const updateprofile = async (req, res) => {
   const { id: _id } = req.params;
-  const { name, about, tags } = req.body.editForm;
+  const { name, about, tags, emailNotifications, smsNotifications } = req.body.editForm;
   if (!mongoose.Types.ObjectId.isValid(_id)) {
     return res.status(400).json({ message: "User unavailable" });
   }
@@ -134,7 +134,15 @@ export const updateprofile = async (req, res) => {
     const updateprofile = await user
       .findByIdAndUpdate(
         _id,
-        { $set: { name: name, about: about, tags: tags } },
+        {
+          $set: {
+            name,
+            about,
+            tags,
+            emailNotifications,
+            smsNotifications,
+          },
+        },
         { new: true },
       )
       .select("-password");

@@ -7,6 +7,8 @@ const userschema = mongoose.Schema({
   password: { type: String, required: true },
   about: { type: String },
   tags: { type: [String] },
+  emailNotifications: { type: Boolean, default: true },
+  smsNotifications: { type: Boolean, default: false },
   joinDate: { type: Date, default: Date.now },
   role: { type: String, enum: ["user", "admin"], default: "user" },
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],

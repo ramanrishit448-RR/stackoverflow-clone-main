@@ -4,11 +4,12 @@ import Mainlayout from "@/layout/Mainlayout";
 import axiosInstance from "@/lib/axiosinstance";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function Home() {
   const [question, setquestion] = useState<any>(null);
   const [loading, setloading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<any>(null);
   const router = useRouter();
   useEffect(() => {
     const fetchquestion = async () => {
@@ -22,7 +23,37 @@ export default function Home() {
       }
     };
     fetchquestion();
+
+    const storedFilter = localStorage.getItem("activeCustomFilter");
+    if (storedFilter) {
+      setActiveFilter(JSON.parse(storedFilter));
+    }
+
+    const handleFilterChange = () => {
+      const nextFilter = localStorage.getItem("activeCustomFilter");
+      setActiveFilter(nextFilter ? JSON.parse(nextFilter) : null);
+    };
+
+    window.addEventListener("customFilterChanged", handleFilterChange);
+    return () => window.removeEventListener("customFilterChanged", handleFilterChange);
   }, []);
+  const visibleQuestions = useMemo(() => {
+    if (!question) return [];
+    if (!activeFilter) return question;
+
+    const tagMatches = (activeFilter.tags || []).map((tag: string) => tag.toLowerCase());
+    const searchTerm = (activeFilter.search || "").toLowerCase();
+
+    return question.filter((item: any) => {
+      const questionText = `${item.questiontitle} ${item.questionbody}`.toLowerCase();
+      const hasTag = tagMatches.every((tag: string) =>
+        (item.questiontags || []).some((itemTag: string) => itemTag.toLowerCase() === tag)
+      );
+      const matchesSearch = !searchTerm || questionText.includes(searchTerm);
+      return hasTag && matchesSearch;
+    });
+  }, [question, activeFilter]);
+
   if (loading) {
     return (
       <Mainlayout>
@@ -96,7 +127,7 @@ export default function Home() {
 
         <div className="w-full">
           <div className="flex flex-col sm:flex-row items-start sm:items-center mb-4 text-sm gap-2 sm:gap-4">
-            <span className="text-gray-600">{question.length} questions</span>
+            <span className="text-gray-600">{visibleQuestions.length} questions</span>
             <div className="flex flex-wrap gap-1 sm:gap-2">
               <button className="px-2 sm:px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs sm:text-sm">
                 Newest
@@ -116,13 +147,22 @@ export default function Home() {
               <button className="px-2 sm:px-3 py-1 text-gray-600 hover:bg-gray-100 rounded text-xs sm:text-sm">
                 More ▼
               </button>
-              <button className="px-2 sm:px-3 py-1 border border-gray-300 text-gray-600 hover:bg-gray-50 rounded ml-auto text-xs sm:text-sm">
-                🔍 Filter
-              </button>
+              {activeFilter ? (
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("activeCustomFilter");
+                    setActiveFilter(null);
+                    window.dispatchEvent(new Event("customFilterChanged"));
+                  }}
+                  className="px-2 sm:px-3 py-1 border border-orange-300 text-orange-600 hover:bg-orange-50 rounded ml-auto text-xs sm:text-sm"
+                >
+                  Clear {activeFilter.name}
+                </button>
+              ) : null}
             </div>
           </div>
           <div className="space-y-4">
-            {question.map((question: any) => (
+            {visibleQuestions.map((question: any) => (
               <div key={question._id} className="border-b border-gray-200 pb-4">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex sm:flex-col items-center sm:items-center text-sm text-gray-600 sm:w-16 lg:w-20 gap-4 sm:gap-2">
@@ -161,14 +201,14 @@ export default function Home() {
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                       <div className="flex flex-wrap gap-1">
                         {question.questiontags.map((tag: any) => (
-                          <div key={tag}>
+                          <Link key={tag} href={`/tags/${tag}`}>
                             <Badge
                               variant="secondary"
                               className="text-xs bg-blue-100 text-blue-800 hover:bg-blue-200 cursor-pointer"
                             >
                               {tag}
                             </Badge>
-                          </div>
+                          </Link>
                         ))}
                       </div>
 

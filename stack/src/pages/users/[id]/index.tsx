@@ -31,6 +31,8 @@ const index = () => {
     name: "",
     about: "",
     tags: [] as string[],
+    emailNotifications: true,
+    smsNotifications: false,
   });
   const [newTag, setNewTag] = useState("");
   const [following, setFollowing] = useState(false);
@@ -99,6 +101,8 @@ const index = () => {
           name: editForm.name,
           about: editForm.about,
           tags: editForm.tags,
+          emailNotifications: editForm.emailNotifications,
+          smsNotifications: editForm.smsNotifications,
         };
 
         setusers(updatedUser);
@@ -170,6 +174,8 @@ const index = () => {
                           name: users?.name || "",
                           about: users?.about || "",
                           tags: users?.tags || [],
+                          emailNotifications: users?.emailNotifications ?? true,
+                          smsNotifications: users?.smsNotifications ?? false,
                         });
                       }
                       setIsEditing(open);
@@ -278,6 +284,40 @@ const index = () => {
                         </div>
                       </div>
 
+                      <div className="space-y-4 rounded-xl border border-gray-200 p-4">
+                        <h3 className="text-lg font-semibold">Delivery Preferences</h3>
+                        <div className="space-y-3 text-sm text-gray-700">
+                          <label className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2">
+                            <span>Email delivery for updates and alerts</span>
+                            <input
+                              type="checkbox"
+                              checked={editForm.emailNotifications}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  emailNotifications: e.target.checked,
+                                })
+                              }
+                              className="h-4 w-4"
+                            />
+                          </label>
+                          <label className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2">
+                            <span>SMS delivery for critical notifications</span>
+                            <input
+                              type="checkbox"
+                              checked={editForm.smsNotifications}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  smsNotifications: e.target.checked,
+                                })
+                              }
+                              className="h-4 w-4"
+                            />
+                          </label>
+                        </div>
+                      </div>
+
                       {/* Action Buttons */}
                       <div className="flex justify-end gap-3 pt-4 border-t">
                         <Button
@@ -343,6 +383,27 @@ const index = () => {
             </Card>
           </div>
           <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Delivery Preferences</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 text-sm text-gray-700">
+                  <div className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
+                    <span>Email updates</span>
+                    <span className={users.emailNotifications === false ? "text-gray-400" : "text-green-600"}>
+                      {users.emailNotifications === false ? "Off" : "On"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
+                    <span>SMS alerts</span>
+                    <span className={users.smsNotifications ? "text-green-600" : "text-gray-400"}>
+                      {users.smsNotifications ? "On" : "Off"}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             <Card>
               <CardHeader>
                 <CardTitle>Top Tags</CardTitle>
