@@ -6,20 +6,26 @@ import axiosInstance from "@/lib/axiosinstance";
 
 export default function TagPage() {
   const router = useRouter();
-  const { tag } = router.query;
+  const rawTag = Array.isArray(router.query.tag)
+    ? router.query.tag[0]
+    : router.query.tag;
+  const tag = rawTag?.trim();
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!tag) return;
+    if (!tag) {
+      setQuestions([]);
+      setLoading(false);
+      return;
+    }
 
     const fetchQuestions = async () => {
       try {
         const res = await axiosInstance.get("/question/getallquestion");
         const filtered = (res.data.data || []).filter((item: any) =>
           (item.questiontags || []).some(
-            (itemTag: string) =>
-              itemTag.toLowerCase() === String(tag).toLowerCase(),
+            (itemTag: string) => itemTag.toLowerCase() === tag.toLowerCase(),
           ),
         );
         setQuestions(filtered);
@@ -48,13 +54,17 @@ export default function TagPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
             Tag
           </p>
-          <h1 className="mt-2 text-3xl font-bold text-gray-900">#{tag}</h1>
+          <h1 className="mt-2 text-3xl font-bold text-gray-900">
+            {tag ? `#${tag}` : "Tag"}
+          </h1>
           <p className="mt-2 text-gray-600">
-            Questions tagged with this topic.
+            {tag
+              ? `Questions tagged with this topic.`
+              : "Select a tag from the questions list to view related posts."}
           </p>
         </div>
 
-        {questions.length === 0 ? (
+        {!tag ? null : questions.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center text-gray-600">
             No questions have been tagged with #{tag} yet.
           </div>

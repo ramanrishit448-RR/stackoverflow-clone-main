@@ -208,16 +208,23 @@ export default function Home() {
 
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                       <div className="flex flex-wrap gap-1">
-                        {question.questiontags.map((tag: any) => (
-                          <Link key={tag} href={`/tags/${tag}`}>
-                            <Badge
-                              variant="secondary"
-                              className="text-xs bg-blue-100 text-blue-800 hover:bg-blue-200 cursor-pointer"
+                        {(question.questiontags || [])
+                          .filter(
+                            (tag: any) => typeof tag === "string" && tag.trim(),
+                          )
+                          .map((tag: any) => (
+                            <Link
+                              key={tag}
+                              href={`/tags/${encodeURIComponent(tag.trim())}`}
                             >
-                              {tag}
-                            </Badge>
-                          </Link>
-                        ))}
+                              <Badge
+                                variant="secondary"
+                                className="text-xs bg-blue-100 text-blue-800 hover:bg-blue-200 cursor-pointer"
+                              >
+                                {tag}
+                              </Badge>
+                            </Link>
+                          ))}
                       </div>
 
                       <div className="flex items-center text-xs text-gray-600 flex-shrink-0">
