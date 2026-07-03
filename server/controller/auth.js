@@ -126,7 +126,8 @@ export const getallusers = async (req, res) => {
 
 export const updateprofile = async (req, res) => {
   const { id: _id } = req.params;
-  const { name, about, tags, emailNotifications, smsNotifications } = req.body.editForm;
+  const { name, about, tags, emailNotifications, smsNotifications } =
+    req.body.editForm;
   if (!mongoose.Types.ObjectId.isValid(_id)) {
     return res.status(400).json({ message: "User unavailable" });
   }

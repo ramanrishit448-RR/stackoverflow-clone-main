@@ -17,7 +17,10 @@ export default function TagPage() {
       try {
         const res = await axiosInstance.get("/question/getallquestion");
         const filtered = (res.data.data || []).filter((item: any) =>
-          (item.questiontags || []).some((itemTag: string) => itemTag.toLowerCase() === String(tag).toLowerCase())
+          (item.questiontags || []).some(
+            (itemTag: string) =>
+              itemTag.toLowerCase() === String(tag).toLowerCase(),
+          ),
         );
         setQuestions(filtered);
       } catch (error) {
@@ -42,9 +45,13 @@ export default function TagPage() {
     <Mainlayout>
       <div className="max-w-5xl space-y-6">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">Tag</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
+            Tag
+          </p>
           <h1 className="mt-2 text-3xl font-bold text-gray-900">#{tag}</h1>
-          <p className="mt-2 text-gray-600">Questions tagged with this topic.</p>
+          <p className="mt-2 text-gray-600">
+            Questions tagged with this topic.
+          </p>
         </div>
 
         {questions.length === 0 ? (
@@ -54,13 +61,23 @@ export default function TagPage() {
         ) : (
           <div className="space-y-3">
             {questions.map((item) => (
-              <Link key={item._id} href={`/questions/${item._id}`} className="block rounded-2xl border border-gray-200 bg-white p-4 shadow-sm hover:border-blue-300">
+              <Link
+                key={item._id}
+                href={`/questions/${item._id}`}
+                className="block rounded-2xl border border-gray-200 bg-white p-4 shadow-sm hover:border-blue-300"
+              >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <h2 className="font-semibold text-gray-900">{item.questiontitle}</h2>
-                    <p className="mt-1 text-sm text-gray-600 line-clamp-2">{item.questionbody}</p>
+                    <h2 className="font-semibold text-gray-900">
+                      {item.questiontitle}
+                    </h2>
+                    <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                      {item.questionbody}
+                    </p>
                   </div>
-                  <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">{item.noofanswer} answers</span>
+                  <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                    {item.noofanswer} answers
+                  </span>
                 </div>
               </Link>
             ))}

@@ -34,13 +34,17 @@ const Navbar = ({ handleslidein }: any) => {
           </Link>
 
           <div className="hidden sm:flex gap-1">
-            {["About", "Products", "For Teams"].map((item) => (
+            {[
+              { label: "About", href: "/about" },
+              { label: "Products", href: "/" },
+              { label: "For Teams", href: "/" },
+            ].map((item) => (
               <Link
-                key={item}
-                href="/"
+                key={item.label}
+                href={item.href}
                 className="text-sm text-[#454545] font-medium px-4 py-2 rounded hover:bg-gray-200 transition"
               >
-                {item}
+                {item.label}
               </Link>
             ))}
           </div>
@@ -54,7 +58,7 @@ const Navbar = ({ handleslidein }: any) => {
           </form>
         </div>
         <div className="flex items-center gap-2">
-           {!hasMounted ? null : !user ? (
+          {!hasMounted ? null : !user ? (
             <Link
               href="/auth"
               className="text-sm font-medium text-[#454545] bg-[#e7f8fe] hover:bg-[#d3e4eb] border border-blue-500 px-4 py-1.5 rounded transition"

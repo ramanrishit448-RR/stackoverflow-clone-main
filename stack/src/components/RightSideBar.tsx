@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
+import CustomFilterDialog from "./feed/CustomFilterDialog";
 const RightSideBar = () => {
   return (
     <aside className="w-72 lg:w-80 p-4 lg:p-6 bg-gray-50 min-h-screen">
@@ -53,13 +54,15 @@ const RightSideBar = () => {
           <h3 className="font-semibold text-gray-800 mb-3 text-sm lg:text-base">
             Custom Filters
           </h3>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-blue-600 border-blue-600 hover:bg-blue-50 bg-transparent text-xs lg:text-sm"
-          >
-            Create a custom filter
-          </Button>
+          <CustomFilterDialog>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-blue-600 border-blue-600 hover:bg-blue-50 bg-transparent text-xs lg:text-sm"
+            >
+              Create a custom filter
+            </Button>
+          </CustomFilterDialog>
         </div>
 
         <div>

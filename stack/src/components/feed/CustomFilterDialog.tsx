@@ -14,7 +14,9 @@ interface CustomFilterDialogProps {
   children: React.ReactNode;
 }
 
-export default function CustomFilterDialog({ children }: CustomFilterDialogProps) {
+export default function CustomFilterDialog({
+  children,
+}: CustomFilterDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("My filter");
   const [search, setSearch] = useState("");
@@ -87,7 +89,10 @@ export default function CustomFilterDialog({ children }: CustomFilterDialogProps
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleSave}>
+          <Button
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={handleSave}
+          >
             Save filter
           </Button>
         </div>

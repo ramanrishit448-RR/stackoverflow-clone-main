@@ -45,7 +45,9 @@ const index = () => {
         const matcheduser = res.data.data.find((u: any) => u._id === id);
         setusers(matcheduser);
         if (id && user) {
-          const followRes = await axiosInstance.get(`/follow/${id}/follow-status`);
+          const followRes = await axiosInstance.get(
+            `/follow/${id}/follow-status`,
+          );
           setFollowing(followRes.data.data.following);
           setFollowerCount(followRes.data.data.followerCount);
         }
@@ -168,7 +170,9 @@ const index = () => {
                   </Button>
                 )}
                 {isOwnProfile && (
-                  <Dialog open={isEditing} onOpenChange={(open) => {
+                  <Dialog
+                    open={isEditing}
+                    onOpenChange={(open) => {
                       if (open) {
                         setEditForm({
                           name: users?.name || "",
@@ -179,7 +183,8 @@ const index = () => {
                         });
                       }
                       setIsEditing(open);
-                    }}>
+                    }}
+                  >
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
@@ -190,153 +195,157 @@ const index = () => {
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white text-gray-900">
-                    <DialogHeader>
-                      <DialogTitle>Edit Profile</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-6 py-4">
-                      {/* Basic Information */}
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold">
-                          Basic Information
-                        </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <DialogHeader>
+                        <DialogTitle>Edit Profile</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-6 py-4">
+                        {/* Basic Information */}
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">
+                            Basic Information
+                          </h3>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="name">Display Name</Label>
+                              <Input
+                                id="name"
+                                value={editForm.name}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    name: e.target.value,
+                                  })
+                                }
+                                placeholder="Your display name"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        {/* About Section */}
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">About</h3>
                           <div>
-                            <Label htmlFor="name">Display Name</Label>
-                            <Input
-                              id="name"
-                              value={editForm.name}
+                            <Label htmlFor="about">About Me</Label>
+                            <Textarea
+                              id="about"
+                              value={editForm.about}
                               onChange={(e) =>
                                 setEditForm({
                                   ...editForm,
-                                  name: e.target.value,
+                                  about: e.target.value,
                                 })
                               }
-                              placeholder="Your display name"
+                              placeholder="Tell us about yourself, your experience, and interests..."
+                              className="min-h-32"
                             />
                           </div>
                         </div>
-                      </div>
-                      {/* About Section */}
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold">About</h3>
-                        <div>
-                          <Label htmlFor="about">About Me</Label>
-                          <Textarea
-                            id="about"
-                            value={editForm.about}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                about: e.target.value,
-                              })
-                            }
-                            placeholder="Tell us about yourself, your experience, and interests..."
-                            className="min-h-32"
-                          />
-                        </div>
-                      </div>
 
-                      {/* Tags/Skills Section */}
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold">
-                          Skills & Technologies
-                        </h3>
+                        {/* Tags/Skills Section */}
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">
+                            Skills & Technologies
+                          </h3>
 
-                        <div className="space-y-3">
-                          <div className="flex gap-2">
-                            <Input
-                              value={newTag}
-                              onChange={(e) => setNewTag(e.target.value)}
-                              placeholder="Add a skill or technology"
-                              onKeyPress={(e) =>
-                                e.key === "Enter" && handleAddTag()
-                              }
-                            />
-                            <Button
-                              onClick={handleAddTag}
-                              variant="outline"
-                              size="sm"
-                              className="bg-orange-600 text-white"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </Button>
-                          </div>
+                          <div className="space-y-3">
+                            <div className="flex gap-2">
+                              <Input
+                                value={newTag}
+                                onChange={(e) => setNewTag(e.target.value)}
+                                placeholder="Add a skill or technology"
+                                onKeyPress={(e) =>
+                                  e.key === "Enter" && handleAddTag()
+                                }
+                              />
+                              <Button
+                                onClick={handleAddTag}
+                                variant="outline"
+                                size="sm"
+                                className="bg-orange-600 text-white"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </Button>
+                            </div>
 
-                          <div className="flex flex-wrap gap-2">
-                            {editForm.tags.map((tag: any) => {
-                              return (
-                                <Badge
-                                  key={tag}
-                                  variant="secondary"
-                                  className="bg-orange-100 text-orange-800 flex items-center gap-1"
-                                >
-                                  {tag}
-                                  <button
-                                    onClick={() => handleRemoveTag(tag)}
-                                    className="ml-1 hover:text-red-600"
+                            <div className="flex flex-wrap gap-2">
+                              {editForm.tags.map((tag: any) => {
+                                return (
+                                  <Badge
+                                    key={tag}
+                                    variant="secondary"
+                                    className="bg-orange-100 text-orange-800 flex items-center gap-1"
                                   >
-                                    <X className="w-3 h-3" />
-                                  </button>
-                                </Badge>
-                              );
-                            })}
+                                    {tag}
+                                    <button
+                                      onClick={() => handleRemoveTag(tag)}
+                                      className="ml-1 hover:text-red-600"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </Badge>
+                                );
+                              })}
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="space-y-4 rounded-xl border border-gray-200 p-4">
-                        <h3 className="text-lg font-semibold">Delivery Preferences</h3>
-                        <div className="space-y-3 text-sm text-gray-700">
-                          <label className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2">
-                            <span>Email delivery for updates and alerts</span>
-                            <input
-                              type="checkbox"
-                              checked={editForm.emailNotifications}
-                              onChange={(e) =>
-                                setEditForm({
-                                  ...editForm,
-                                  emailNotifications: e.target.checked,
-                                })
-                              }
-                              className="h-4 w-4"
-                            />
-                          </label>
-                          <label className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2">
-                            <span>SMS delivery for critical notifications</span>
-                            <input
-                              type="checkbox"
-                              checked={editForm.smsNotifications}
-                              onChange={(e) =>
-                                setEditForm({
-                                  ...editForm,
-                                  smsNotifications: e.target.checked,
-                                })
-                              }
-                              className="h-4 w-4"
-                            />
-                          </label>
+                        <div className="space-y-4 rounded-xl border border-gray-200 p-4">
+                          <h3 className="text-lg font-semibold">
+                            Delivery Preferences
+                          </h3>
+                          <div className="space-y-3 text-sm text-gray-700">
+                            <label className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2">
+                              <span>Email delivery for updates and alerts</span>
+                              <input
+                                type="checkbox"
+                                checked={editForm.emailNotifications}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    emailNotifications: e.target.checked,
+                                  })
+                                }
+                                className="h-4 w-4"
+                              />
+                            </label>
+                            <label className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2">
+                              <span>
+                                SMS delivery for critical notifications
+                              </span>
+                              <input
+                                type="checkbox"
+                                checked={editForm.smsNotifications}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    smsNotifications: e.target.checked,
+                                  })
+                                }
+                                className="h-4 w-4"
+                              />
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex justify-end gap-3 pt-4 border-t">
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsEditing(false)}
+                            className="bg-white text-gray-800 hover:text-gray-900"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleSaveProfile}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            Save Changes
+                          </Button>
                         </div>
                       </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex justify-end gap-3 pt-4 border-t">
-                        <Button
-                          variant="outline"
-                          onClick={() => setIsEditing(false)}
-                          className="bg-white text-gray-800 hover:text-gray-900"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          onClick={handleSaveProfile}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          Save Changes
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                    </DialogContent>
+                  </Dialog>
                 )}
               </div>
             </div>
@@ -391,13 +400,25 @@ const index = () => {
                 <div className="space-y-3 text-sm text-gray-700">
                   <div className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
                     <span>Email updates</span>
-                    <span className={users.emailNotifications === false ? "text-gray-400" : "text-green-600"}>
+                    <span
+                      className={
+                        users.emailNotifications === false
+                          ? "text-gray-400"
+                          : "text-green-600"
+                      }
+                    >
                       {users.emailNotifications === false ? "Off" : "On"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
                     <span>SMS alerts</span>
-                    <span className={users.smsNotifications ? "text-green-600" : "text-gray-400"}>
+                    <span
+                      className={
+                        users.smsNotifications
+                          ? "text-green-600"
+                          : "text-gray-400"
+                      }
+                    >
                       {users.smsNotifications ? "On" : "Off"}
                     </span>
                   </div>

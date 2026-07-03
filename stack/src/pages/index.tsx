@@ -35,19 +35,25 @@ export default function Home() {
     };
 
     window.addEventListener("customFilterChanged", handleFilterChange);
-    return () => window.removeEventListener("customFilterChanged", handleFilterChange);
+    return () =>
+      window.removeEventListener("customFilterChanged", handleFilterChange);
   }, []);
   const visibleQuestions = useMemo(() => {
     if (!question) return [];
     if (!activeFilter) return question;
 
-    const tagMatches = (activeFilter.tags || []).map((tag: string) => tag.toLowerCase());
+    const tagMatches = (activeFilter.tags || []).map((tag: string) =>
+      tag.toLowerCase(),
+    );
     const searchTerm = (activeFilter.search || "").toLowerCase();
 
     return question.filter((item: any) => {
-      const questionText = `${item.questiontitle} ${item.questionbody}`.toLowerCase();
+      const questionText =
+        `${item.questiontitle} ${item.questionbody}`.toLowerCase();
       const hasTag = tagMatches.every((tag: string) =>
-        (item.questiontags || []).some((itemTag: string) => itemTag.toLowerCase() === tag)
+        (item.questiontags || []).some(
+          (itemTag: string) => itemTag.toLowerCase() === tag,
+        ),
       );
       const matchesSearch = !searchTerm || questionText.includes(searchTerm);
       return hasTag && matchesSearch;
@@ -127,7 +133,9 @@ export default function Home() {
 
         <div className="w-full">
           <div className="flex flex-col sm:flex-row items-start sm:items-center mb-4 text-sm gap-2 sm:gap-4">
-            <span className="text-gray-600">{visibleQuestions.length} questions</span>
+            <span className="text-gray-600">
+              {visibleQuestions.length} questions
+            </span>
             <div className="flex flex-wrap gap-1 sm:gap-2">
               <button className="px-2 sm:px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs sm:text-sm">
                 Newest
