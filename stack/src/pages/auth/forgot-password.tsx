@@ -32,9 +32,10 @@ const ForgotPasswordPage = () => {
       const res = await axiosInstance.post("/user/forgot-password", {
         identifier: identifier.trim(),
       });
-      setGeneratedPassword(res.data.password);
+      const delivered = res.data.deliveredVia || "Email/SMS";
+      setGeneratedPassword(res.data.debugPassword || "");
       setStatusMessage(
-        "Your password has been reset successfully. Use the generated password below to log in.",
+        `Your password has been reset successfully. A temporary password has been sent via ${delivered}. Please check your inbox / messages.`,
       );
       toast.success("Password reset successful.");
     } catch (error: any) {
@@ -103,10 +104,16 @@ const ForgotPasswordPage = () => {
                 </div>
               ) : null}
               {generatedPassword ? (
-                <div className="rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-900">
-                  <p className="font-semibold">Generated password:</p>
-                  <p className="mt-2 break-all text-lg font-medium">
+                <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900">
+                  <p className="font-semibold">Development / Simulation Log:</p>
+                  <p className="mt-1">
+                    Since SMTP/SMS delivery is simulated in this environment, the password was logged to the console/files, but you can also copy it here:
+                  </p>
+                  <p className="mt-2 break-all text-lg font-medium font-mono bg-white p-2 rounded border border-yellow-300 select-all">
                     {generatedPassword}
+                  </p>
+                  <p className="mt-2 text-xs text-yellow-700">
+                    In a production flow, the password is only sent to the user's registered address and is not returned in the API response.
                   </p>
                 </div>
               ) : null}

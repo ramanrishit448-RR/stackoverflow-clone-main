@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import user from "../models/auth.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { sendEmail, sendSMS } from "../utils/delivery.js";
 
 const sanitizeUser = (doc) => {
   const obj = doc.toObject ? doc.toObject() : doc;
@@ -104,9 +105,41 @@ export const ForgotPassword = async (req, res) => {
     existingUser.lastForgotPasswordRequest = new Date();
     await existingUser.save();
 
+    let deliveredVia = "Email/SMS";
+    if (identifier.includes("@")) {
+      deliveredVia = "Email";
+      await sendEmail({
+        to: existingUser.email,
+        subject: "[StackOverflow Clone] Password Reset Request",
+        text: `Hello ${existingUser.name},\n\nYour password has been reset successfully.\n\nYour temporary password is: ${newPassword}\n\nPlease log in and update your password immediately.\n\nBest regards,\nStackOverflow Clone Team`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h2 style="color: #f97316;">StackOverflow Clone</h2>
+            </div>
+            <p>Hello <strong>${existingUser.name}</strong>,</p>
+            <p>Your password has been reset successfully. Here is your temporary password to log in:</p>
+            <div style="background-color: #f1f5f9; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; letter-spacing: 1px; color: #1e3a8a; border-radius: 8px; margin: 20px 0;">
+              ${newPassword}
+            </div>
+            <p style="color: #475569;">Please log in and update your password under your profile settings immediately.</p>
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #94a3b8; text-align: center;">This is an automated message. Please do not reply directly to this email.</p>
+          </div>
+        `
+      });
+    } else {
+      deliveredVia = "SMS";
+      await sendSMS({
+        to: existingUser.phone || identifier,
+        body: `StackOverflow Clone: Your temporary password is: ${newPassword}. Please log in and change it immediately.`
+      });
+    }
+
     return res.status(200).json({
-      message: "Password reset successful.",
-      password: newPassword,
+      message: `Password reset successful. Sent temporary password via ${deliveredVia}.`,
+      deliveredVia,
+      debugPassword: newPassword,
     });
   } catch (error) {
     console.error(error);
