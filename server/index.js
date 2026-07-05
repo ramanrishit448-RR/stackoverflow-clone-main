@@ -9,6 +9,7 @@ import feedroutes from "./routes/feed.js"
 import followroutes from "./routes/follow.js"
 import notificationroutes from "./routes/notification.js"
 import adminroutes from "./routes/admin.js"
+import paymentroutes from "./routes/payment.js"
 const app = express();
 dotenv.config();
 app.use(express.json({ limit: "30mb", extended: true }));
@@ -24,6 +25,7 @@ app.use('/feed', feedroutes)
 app.use('/follow', followroutes)
 app.use('/notifications', notificationroutes)
 app.use('/admin', adminroutes)
+app.use('/payment', paymentroutes)
 const PORT = process.env.PORT || 5000;
 const databaseurl = process.env.MONGODB_URL;
 

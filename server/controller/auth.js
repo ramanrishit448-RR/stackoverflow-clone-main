@@ -187,3 +187,16 @@ export const updateprofile = async (req, res) => {
     return;
   }
 };
+
+export const getProfile = async (req, res) => {
+  try {
+    const currentUser = await user.findById(req.userid).select("-password");
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json({ data: currentUser });
+  } catch (error) {
+    console.error("Get profile failed:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};

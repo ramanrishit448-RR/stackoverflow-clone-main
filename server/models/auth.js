@@ -17,5 +17,12 @@ const userschema = mongoose.Schema({
   suspendedUntil: { type: Date },
   violationCount: { type: Number, default: 0 },
   lastForgotPasswordRequest: { type: Date },
+  plan: { type: String, enum: ["free", "bronze", "silver", "gold"], default: "free" },
+  subscriptionStatus: { type: String, enum: ["active", "expired", "inactive"], default: "active" },
+  subscriptionStartDate: { type: Date, default: Date.now },
+  subscriptionEndDate: { type: Date },
+  billingName: { type: String },
+  billingEmail: { type: String },
+  billingAddress: { type: String },
 });
 export default mongoose.model("user", userschema);

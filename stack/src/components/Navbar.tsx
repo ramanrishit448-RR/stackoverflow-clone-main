@@ -2,16 +2,15 @@ import { useAuth } from "@/lib/AuthContext";
 import NotificationDropdown from "./feed/NotificationDropdown";
 import { Menu, Search } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-
-// const User = {
-//   _id: "1",
-//   name: "Alice Johnson",
-// };
 
 const Navbar = ({ handleslidein }: any) => {
   const { user, Logout } = useAuth();
   const [hasMounted, setHasMounted] = useState(false);
+  const [search, setSearch] = useState("");
+  const router = useRouter();
+
   useEffect(() => {
     setHasMounted(true);
   }, []);
@@ -48,10 +47,12 @@ const Navbar = ({ handleslidein }: any) => {
               </Link>
             ))}
           </div>
-          <form className="hidden lg:block flex-grow relative px-3">
+          <form onSubmit={(e) => { e.preventDefault(); router.push(`/?search=${encodeURIComponent(search.trim())}`); }} className="hidden lg:block flex-grow relative px-3">
             <input
               type="text"
               placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="w-full max-w-[600px] pl-9 pr-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-300"
             />
             <Search className="absolute left-4 top-2.5 h-4 w-4 text-gray-600" />

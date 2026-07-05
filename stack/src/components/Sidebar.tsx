@@ -10,6 +10,7 @@ import {
   Tag,
   Trophy,
   Users,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -87,6 +88,16 @@ const Sidebar = ({ isopen, onClose }: any) => {
               >
                 <Bookmark className="w-4 h-4 mr-2 lg:mr-3" />
                 Saves
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/exclusive-lounge"
+                onClick={onClose}
+                className="flex items-center px-2 py-2 text-yellow-800 bg-yellow-50/50 hover:bg-yellow-100/70 rounded text-sm font-semibold border border-yellow-200/50"
+              >
+                <Sparkles className="w-4 h-4 mr-2 lg:mr-3 text-yellow-600 fill-current" />
+                Gold Lounge
               </Link>
             </li>
             <li>

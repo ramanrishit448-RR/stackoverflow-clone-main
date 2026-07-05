@@ -285,6 +285,25 @@ export const toggleBookmark = async (req, res) => {
     if (bookmarked) {
       post.bookmarks = post.bookmarks.filter((id) => id.toString() !== req.userid);
     } else {
+      // Enforce bookmark limits
+      const currentUser = await User.findById(req.userid);
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const plan = currentUser.subscriptionStatus === "active" ? currentUser.plan : "free";
+      
+      let bookmarkLimit = 3; // Free plan limit
+      if (plan === "bronze") bookmarkLimit = 7;
+      else if (plan === "silver" || plan === "gold") bookmarkLimit = Infinity;
+
+      if (bookmarkLimit !== Infinity) {
+        const count = await Post.countDocuments({ isRemoved: false, bookmarks: req.userid });
+        if (count >= bookmarkLimit) {
+          return res.status(403).json({
+            message: `Bookmark limit reached. Your current plan (${plan.toUpperCase()}) allows up to ${bookmarkLimit} bookmarks. Please upgrade to Silver or Gold to bookmark unlimited posts!`
+          });
+        }
+      }
       post.bookmarks.push(uid);
     }
 

@@ -40,17 +40,20 @@ export default function Home() {
   }, []);
   const visibleQuestions = useMemo(() => {
     if (!question) return [];
-    if (!activeFilter) return question;
+    
+    const querySearch = (router.query.search as string || "").trim().toLowerCase();
+    if (!activeFilter && !querySearch) return question;
 
-    const tagMatches = (activeFilter.tags || []).map((tag: string) =>
-      tag.toLowerCase(),
-    );
-    const searchTerm = (activeFilter.search || "").toLowerCase();
+    const tagMatches = activeFilter ? (activeFilter.tags || []).map((tag: string) =>
+      tag.toLowerCase()
+    ) : [];
+    
+    const searchTerm = (querySearch || activeFilter?.search || "").toLowerCase();
 
     return question.filter((item: any) => {
       const questionText =
         `${item.questiontitle} ${item.questionbody}`.toLowerCase();
-      const hasTag = tagMatches.every((tag: string) =>
+      const hasTag = tagMatches.length === 0 || tagMatches.every((tag: string) =>
         (item.questiontags || []).some(
           (itemTag: string) => itemTag.toLowerCase() === tag,
         ),
@@ -58,7 +61,7 @@ export default function Home() {
       const matchesSearch = !searchTerm || questionText.includes(searchTerm);
       return hasTag && matchesSearch;
     });
-  }, [question, activeFilter]);
+  }, [question, activeFilter, router.query.search]);
 
   if (loading) {
     return (
@@ -237,8 +240,11 @@ export default function Home() {
                               {question.userposted[0]}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-blue-600 hover:text-blue-800 mr-1">
+                          <span className="text-blue-600 hover:text-blue-800 mr-1 font-semibold flex items-center gap-0.5">
                             {question.userposted}
+                            {question.userPlan === "gold" && <span className="text-yellow-500 font-extrabold text-[10px] ml-0.5" title="Gold Member">★</span>}
+                            {question.userPlan === "silver" && <span className="text-slate-400 font-extrabold text-[10px] ml-0.5" title="Silver Member">★</span>}
+                            {question.userPlan === "bronze" && <span className="text-amber-700 font-extrabold text-[10px] ml-0.5" title="Bronze Member">★</span>}
                           </span>
                         </Link>
 

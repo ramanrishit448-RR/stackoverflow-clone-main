@@ -9,6 +9,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/AuthContext";
+import { toast } from "react-toastify";
 
 interface CustomFilterDialogProps {
   children: React.ReactNode;
@@ -17,10 +19,27 @@ interface CustomFilterDialogProps {
 export default function CustomFilterDialog({
   children,
 }: CustomFilterDialogProps) {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("My filter");
   const [search, setSearch] = useState("");
   const [tags, setTags] = useState("");
+
+  const plan = user?.subscriptionStatus === "active" ? (user.plan || "free") : "free";
+  const hasAccess = plan === "bronze" || plan === "silver" || plan === "gold";
+
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    if (!user) {
+      e.stopPropagation();
+      toast.error("Please log in to use custom filters.");
+      return;
+    }
+    if (!hasAccess) {
+      e.stopPropagation();
+      toast.info("Advanced search filters (Custom Filters) require a Bronze subscription or higher.");
+      return;
+    }
+  };
 
   useEffect(() => {
     const stored = localStorage.getItem("activeCustomFilter");
@@ -48,8 +67,13 @@ export default function CustomFilterDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open} onOpenChange={(val) => {
+      if (val && !hasAccess) return;
+      setOpen(val);
+    }}>
+      <div onClickCapture={handleTriggerClick} className="inline-block">
+        <DialogTrigger asChild>{children}</DialogTrigger>
+      </div>
       <DialogContent className="bg-white text-gray-900 sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Create custom filter</DialogTitle>

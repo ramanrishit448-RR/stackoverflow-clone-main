@@ -322,8 +322,11 @@ const QuestionDetail = ({ questionId }: any) => {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="text-blue-600 hover:text-blue-800 font-medium">
+                      <div className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
                         {question.userposted}
+                        {question.userPlan === "gold" && <span className="text-yellow-500 font-bold text-xs" title="Gold Member">★ Gold</span>}
+                        {question.userPlan === "silver" && <span className="text-slate-400 font-bold text-xs" title="Silver Member">★ Silver</span>}
+                        {question.userPlan === "bronze" && <span className="text-amber-700 font-bold text-xs" title="Bronze Member">★ Bronze</span>}
                       </div>
                     </div>
                   </Link>

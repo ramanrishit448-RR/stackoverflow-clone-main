@@ -71,9 +71,26 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("user");
     toast.info("Logged out");
   };
+  
+  const refreshUser = async () => {
+    try {
+      const res = await axiosInstance.get("/user/profile");
+      if (res.data.data) {
+        const stored = localStorage.getItem("user");
+        const token = stored ? JSON.parse(stored).token : null;
+        const updatedUser = { ...res.data.data, token };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        return updatedUser;
+      }
+    } catch (error) {
+      console.error("Error refreshing user profile:", error);
+    }
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, Signup, Login, Logout, loading, error }}
+      value={{ user, Signup, Login, Logout, refreshUser, loading, error }}
     >
       {children}
     </AuthContext.Provider>
