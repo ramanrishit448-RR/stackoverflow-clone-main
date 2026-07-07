@@ -35,8 +35,12 @@ export const createArticle = async (req, res) => {
 
 export const getAllArticles = async (req, res) => {
   try {
-    const { search, category } = req.query;
+    const { search, category, authorId } = req.query;
     let query = {};
+
+    if (authorId) {
+      query.authorId = authorId;
+    }
 
     if (category) {
       query.category = category;

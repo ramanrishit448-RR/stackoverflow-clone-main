@@ -77,7 +77,9 @@ export const getFeed = async (req, res) => {
 
     let filter = { isRemoved: false };
 
-    if (mode === "following" && req.userid) {
+    if (req.query.authorId) {
+      filter.authorId = req.query.authorId;
+    } else if (mode === "following" && req.userid) {
       const user = await User.findById(req.userid).select("following");
       const followingIds = user?.following || [];
       filter.authorId = { $in: [...followingIds, req.userid] };

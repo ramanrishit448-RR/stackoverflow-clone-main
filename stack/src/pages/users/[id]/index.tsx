@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Mainlayout from "@/layout/Mainlayout";
 import { useAuth } from "@/lib/AuthContext";
 import axiosInstance from "@/lib/axiosinstance";
-import { Calendar, Edit, Plus, X, Award, ShieldAlert, CreditCard, HelpCircle, Mail, Download, Check } from "lucide-react";
+import { Calendar, Edit, Plus, X, Award, ShieldAlert, CreditCard, HelpCircle, Mail, Download, Check, Users, BookOpen, MessageSquare, Rss } from "lucide-react";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -72,6 +72,35 @@ const index = () => {
   });
   const [isSubmittingSupport, setIsSubmittingSupport] = useState(false);
 
+  const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [userArticles, setUserArticles] = useState<any[]>([]);
+  const [userTeams, setUserTeams] = useState<any[]>([]);
+  const [loadingUserActivity, setLoadingUserActivity] = useState(false);
+
+  const fetchUserActivity = async () => {
+    if (!id) return;
+    try {
+      setLoadingUserActivity(true);
+      const postsRes = await axiosInstance.get(`/feed?authorId=${id}`);
+      setUserPosts(postsRes.data.data || []);
+
+      const articlesRes = await axiosInstance.get(`/articles?authorId=${id}`);
+      setUserArticles(articlesRes.data.data || []);
+
+      if (user) {
+        const teamsRes = await axiosInstance.get("/teams");
+        const joined = (teamsRes.data.data || []).filter((t: any) =>
+          t.members.some((m: any) => (m._id || m) === id)
+        );
+        setUserTeams(joined);
+      }
+    } catch (err) {
+      console.error("Failed to fetch user activity:", err);
+    } finally {
+      setLoadingUserActivity(false);
+    }
+  };
+
   const fetchInvoices = async () => {
     if (!id || id !== user?._id) return;
     setLoadingInvoices(true);
@@ -117,6 +146,7 @@ const index = () => {
       }
     };
     fetchuser();
+    fetchUserActivity();
     
     if (id && user && id === user._id) {
       fetchInvoices();
@@ -554,35 +584,55 @@ const index = () => {
         </div>
 
         {/* Tab Selection Row */}
-        <div className="flex border-b border-gray-200 mb-6 gap-2">
+        <div className="flex border-b border-gray-200 mb-6 gap-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab("profile")}
-            className={`py-3 px-4 text-sm font-semibold border-b-2 transition-all ${
+            className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all whitespace-nowrap ${
               activeTab === "profile" ? "border-orange-500 text-orange-600" : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
             User Profile
+          </button>
+
+          <button
+            onClick={() => setActiveTab("activity")}
+            className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === "activity" ? "border-orange-500 text-orange-600" : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <Rss className="w-3.5 h-3.5" />
+            Activity ({userPosts.length + userArticles.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("teams")}
+            className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === "teams" ? "border-orange-500 text-orange-600" : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            Workspaces ({userTeams.length})
           </button>
           
           {isOwnProfile && (
             <>
               <button
                 onClick={() => setActiveTab("billing")}
-                className={`py-3 px-4 text-sm font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
+                className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 whitespace-nowrap ${
                   activeTab === "billing" ? "border-orange-500 text-orange-600" : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
-                <CreditCard className="w-4 h-4" />
+                <CreditCard className="w-3.5 h-3.5" />
                 Membership & Billing
               </button>
 
               <button
                 onClick={() => setActiveTab("support")}
-                className={`py-3 px-4 text-sm font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
+                className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 whitespace-nowrap ${
                   activeTab === "support" ? "border-orange-500 text-orange-600" : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
-                <HelpCircle className="w-4 h-4" />
+                <HelpCircle className="w-3.5 h-3.5" />
                 Priority Support
               </button>
             </>
@@ -640,6 +690,138 @@ const index = () => {
                 </CardContent>
               </Card>
             </div>
+          </div>
+        )}
+
+        {/* Tab: Activity View (Posts & Articles) */}
+        {activeTab === "activity" && (
+          <div className="space-y-8">
+            {loadingUserActivity ? (
+              <div className="flex justify-center py-12">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left side: Posts */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-gray-800 flex items-center gap-1.5 border-b border-gray-150 pb-2">
+                    <MessageSquare className="w-4 h-4 text-blue-500" />
+                    Community Updates & Posts ({userPosts.length})
+                  </h3>
+                  {userPosts.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic py-4">No social posts published yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {userPosts.map((post: any) => (
+                        <div key={post._id} className="p-4 rounded-xl border border-gray-200 bg-white shadow-sm space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="rounded bg-blue-50 px-2 py-0.5 text-[9px] font-bold text-blue-600 border border-blue-100 capitalize">
+                              {post.type}
+                            </span>
+                            <span className="text-[9px] text-gray-400">
+                              {new Date(post.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-700 line-clamp-3">{post.content}</p>
+                          <div className="flex flex-wrap gap-1">
+                            {post.hashtags?.map((tag: string) => (
+                              <span key={tag} className="text-[9px] text-gray-400 font-mono">
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Right side: Articles */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-gray-800 flex items-center gap-1.5 border-b border-gray-150 pb-2">
+                    <BookOpen className="w-4 h-4 text-orange-500" />
+                    Technical Articles ({userArticles.length})
+                  </h3>
+                  {userArticles.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic py-4">No developer articles published yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {userArticles.map((article: any) => (
+                        <div
+                          key={article._id}
+                          onClick={() => router.push(`/articles/${article._id}`)}
+                          className="group p-4 rounded-xl border border-gray-200 bg-white shadow-sm hover:border-orange-300 hover:shadow-sm cursor-pointer transition flex gap-3"
+                        >
+                          {article.coverImage && (
+                            <img
+                              src={article.coverImage}
+                              alt={article.title}
+                              className="h-14 w-20 object-cover rounded-lg shrink-0 border border-gray-100"
+                            />
+                          )}
+                          <div className="min-w-0 flex-grow">
+                            <h4 className="text-xs font-bold text-gray-900 group-hover:text-orange-500 transition line-clamp-1">
+                              {article.title}
+                            </h4>
+                            <span className="rounded bg-orange-50 px-2 py-0.5 text-[9px] font-bold text-orange-600 inline-block mt-1">
+                              {article.category}
+                            </span>
+                            <div className="text-[9px] text-gray-400 mt-2 flex items-center gap-2">
+                              <span>{new Date(article.createdAt).toLocaleDateString()}</span>
+                              <span>•</span>
+                              <span>{article.readTime}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab: Teams View */}
+        {activeTab === "teams" && (
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-gray-800 border-b border-gray-150 pb-2 flex items-center gap-1.5">
+              <Users className="w-4 h-4 text-green-500" />
+              Joined Team Workspaces ({userTeams.length})
+            </h3>
+            {loadingUserActivity ? (
+              <div className="flex justify-center py-12">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+              </div>
+            ) : userTeams.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-gray-300 p-8 text-center">
+                <p className="text-xs text-gray-400 italic">This user hasn't joined any team workspaces.</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {userTeams.map((team) => (
+                  <div
+                    key={team._id}
+                    onClick={() => router.push(`/teams/${team._id}`)}
+                    className="group p-4 rounded-2xl border border-gray-200 bg-white hover:border-orange-300 hover:shadow-sm cursor-pointer transition flex items-center gap-3"
+                  >
+                    <div className="h-10 w-10 shrink-0 rounded-lg overflow-hidden border border-gray-150 bg-gray-50 flex items-center justify-center font-bold text-orange-600">
+                      {team.logoUrl ? (
+                        <img src={team.logoUrl} alt={team.name} className="h-full w-full object-cover" />
+                      ) : (
+                        team.name.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-xs font-bold text-gray-900 group-hover:text-orange-500 transition truncate">
+                        {team.name}
+                      </h4>
+                      <p className="text-[10px] text-gray-500 line-clamp-1">{team.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
