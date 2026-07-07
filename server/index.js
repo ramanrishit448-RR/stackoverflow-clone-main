@@ -10,6 +10,10 @@ import followroutes from "./routes/follow.js"
 import notificationroutes from "./routes/notification.js"
 import adminroutes from "./routes/admin.js"
 import paymentroutes from "./routes/payment.js"
+import articleRoute from "./routes/article.js"
+import teamRoute from "./routes/team.js"
+import collectiveRoute from "./routes/collective.js"
+import companyRoute from "./routes/company.js"
 const app = express();
 dotenv.config();
 app.use(express.json({ limit: "30mb", extended: true }));
@@ -26,6 +30,10 @@ app.use('/follow', followroutes)
 app.use('/notifications', notificationroutes)
 app.use('/admin', adminroutes)
 app.use('/payment', paymentroutes)
+app.use('/articles', articleRoute)
+app.use('/teams', teamRoute)
+app.use('/collectives', collectiveRoute)
+app.use('/companies', companyRoute)
 const PORT = process.env.PORT || 5000;
 const databaseurl = process.env.MONGODB_URL;
 

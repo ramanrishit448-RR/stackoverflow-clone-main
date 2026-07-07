@@ -35,8 +35,8 @@ const Navbar = ({ handleslidein }: any) => {
           <div className="hidden sm:flex gap-1">
             {[
               { label: "About", href: "/about" },
-              { label: "Products", href: "/" },
-              { label: "For Teams", href: "/" },
+              { label: "Products", href: "/products" },
+              { label: "For Teams", href: "/teams" },
             ].map((item) => (
               <Link
                 key={item.label}
