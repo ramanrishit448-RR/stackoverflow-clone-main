@@ -239,18 +239,52 @@ export default function TeamDetail() {
 
               {/* Members listing */}
               <div className="space-y-3 divide-y divide-gray-50">
-                {/* Note: In a production scenario, we'd fetch full user objects.
-                    We will display fallback placeholders for now. */}
-                <div className="flex items-center gap-2 pt-2 first:pt-0">
-                  <div className="h-7 w-7 rounded-full bg-blue-100 text-blue-800 font-bold text-[10px] flex items-center justify-center">
-                    {user?.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-gray-900 block truncate max-w-[150px]">{user?.name} (You)</span>
-                    <span className="text-[9px] text-gray-400">Team Admin</span>
-                  </div>
-                </div>
+                {team.members?.map((member: any) => {
+                  const isCurrentUser = member._id === user?._id;
+                  const isOwner = member._id === team.ownerId;
+                  return (
+                    <div key={member._id} className="flex items-center gap-2 pt-2 first:pt-0">
+                      <div className="h-7 w-7 rounded-full bg-blue-100 text-blue-800 font-bold text-[10px] flex items-center justify-center shrink-0">
+                        {member.name?.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-xs font-bold text-gray-900 block truncate max-w-[150px]">
+                          {member.name} {isCurrentUser && "(You)"}
+                        </span>
+                        <span className="text-[9px] text-gray-400 block truncate">
+                          {isOwner ? "Workspace Admin" : "Team Member"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
+            </div>
+
+            {/* Add Member form */}
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm space-y-3">
+              <div>
+                <h3 className="text-xs font-bold text-gray-800">Add Team Member</h3>
+                <p className="text-[9px] text-gray-400">Grant access to a developer by their registered email.</p>
+              </div>
+
+              <form onSubmit={handleInviteMember} className="space-y-2">
+                <input
+                  type="email"
+                  placeholder="colleague@example.com"
+                  value={memberEmail}
+                  onChange={(e) => setMemberEmail(e.target.value)}
+                  className="w-full rounded-xl border border-gray-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={invitingMember || !memberEmail.trim()}
+                  className="w-full rounded-lg bg-orange-500 py-1.5 text-xs font-bold text-white hover:bg-orange-600 disabled:opacity-50 transition"
+                >
+                  {invitingMember ? "Adding..." : "Add Member"}
+                </button>
+              </form>
             </div>
           </div>
         </div>

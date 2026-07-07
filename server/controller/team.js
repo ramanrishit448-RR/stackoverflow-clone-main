@@ -58,6 +58,7 @@ export const getTeamById = async (req, res) => {
       return res.status(403).json({ message: "Access denied. You are not a member of this team." });
     }
 
+    await team.populate("members", "name email");
     res.status(200).json({ data: team });
   } catch (error) {
     res.status(500).json({ message: error.message || "Something went wrong." });
@@ -128,6 +129,7 @@ export const createTeamPost = async (req, res) => {
     team.posts.push(newPost);
     await team.save();
 
+    await team.populate("members", "name email");
     res.status(201).json({ data: team });
   } catch (error) {
     res.status(500).json({ message: error.message || "Something went wrong." });
@@ -168,6 +170,7 @@ export const addTeamMember = async (req, res) => {
     team.members.push(userToAdd._id);
     await team.save();
 
+    await team.populate("members", "name email");
     res.status(200).json({ data: team, message: "Member added successfully!" });
   } catch (error) {
     res.status(500).json({ message: error.message || "Something went wrong." });
