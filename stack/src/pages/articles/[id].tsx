@@ -16,6 +16,7 @@ export default function ArticleDetail() {
   const [commentContent, setCommentContent] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchArticle = async () => {
     if (!id) return;
@@ -51,6 +52,20 @@ export default function ArticleDetail() {
       toast.success(res.data.data.likes.includes(user._id) ? "Liked article!" : "Unliked article");
     } catch (error: any) {
       toast.error("Failed to update like status.");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this article? This action cannot be undone.")) return;
+    try {
+      setDeleting(true);
+      await axiosInstance.delete(`/articles/${id}`);
+      toast.success("Article deleted successfully!");
+      router.push("/articles");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to delete article.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -152,18 +167,30 @@ export default function ArticleDetail() {
                 </div>
               </div>
 
-              {/* Likes counter indicator */}
-              <button
-                onClick={handleLike}
-                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
-                  isLiked
-                    ? "bg-red-50 text-red-600 border border-red-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
-                }`}
-              >
-                <Heart className={`h-4.5 w-4.5 ${isLiked ? "fill-current text-red-500" : ""}`} />
-                {article.likes?.length || 0} Likes
-              </button>
+              {/* Likes counter and Delete buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleLike}
+                  className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+                    isLiked
+                      ? "bg-red-50 text-red-600 border border-red-200"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-transparent"
+                  }`}
+                >
+                  <Heart className={`h-4.5 w-4.5 ${isLiked ? "fill-current text-red-500" : ""}`} />
+                  {article.likes?.length || 0} Likes
+                </button>
+
+                {user?._id === article.authorId && (
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 text-red-600 border border-red-200 px-4 py-2 text-xs font-semibold hover:bg-red-100/70 disabled:opacity-50 transition"
+                  >
+                    {deleting ? "Deleting..." : "Delete"}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

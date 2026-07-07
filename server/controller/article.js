@@ -140,3 +140,27 @@ export const addArticleComment = async (req, res) => {
     res.status(500).json({ message: error.message || "Something went wrong." });
   }
 };
+
+export const deleteArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ message: "Invalid article ID." });
+    }
+
+    const article = await Article.findById(id);
+    if (!article) {
+      return res.status(404).json({ message: "Article not found." });
+    }
+
+    if (article.authorId.toString() !== req.userid) {
+      return res.status(403).json({ message: "Access denied. Only the author can delete this article." });
+    }
+
+    await Article.findByIdAndDelete(id);
+    res.status(200).json({ message: "Article deleted successfully." });
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Something went wrong." });
+  }
+};

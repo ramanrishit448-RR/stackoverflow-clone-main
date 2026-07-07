@@ -5,6 +5,7 @@ import {
   getArticleById,
   likeArticle,
   addArticleComment,
+  deleteArticle,
 } from "../controller/article.js";
 import auth from "../middleware/auth.js";
 
@@ -15,5 +16,6 @@ router.get("/:id", getArticleById);
 router.post("/", auth, createArticle);
 router.post("/:id/like", auth, likeArticle);
 router.post("/:id/comment", auth, addArticleComment);
+router.delete("/:id", auth, deleteArticle);
 
 export default router;
