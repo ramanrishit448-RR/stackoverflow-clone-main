@@ -133,3 +133,43 @@ export const createTeamPost = async (req, res) => {
     res.status(500).json({ message: error.message || "Something went wrong." });
   }
 };
+
+export const addTeamMember = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ message: "Invalid team ID." });
+    }
+
+    const team = await Team.findById(id);
+    if (!team) {
+      return res.status(404).json({ message: "Team not found." });
+    }
+
+    if (!team.members.includes(req.userid)) {
+      return res.status(403).json({ message: "Only team members can add other members." });
+    }
+
+    const userToAdd = await User.findOne({ email });
+    if (!userToAdd) {
+      return res.status(404).json({ message: "User not found with this email." });
+    }
+
+    if (team.members.includes(userToAdd._id)) {
+      return res.status(400).json({ message: "User is already a member of this team." });
+    }
+
+    team.members.push(userToAdd._id);
+    await team.save();
+
+    res.status(200).json({ data: team, message: "Member added successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: error.message || "Something went wrong." });
+  }
+};

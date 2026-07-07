@@ -16,6 +16,8 @@ export default function TeamDetail() {
   const [postContent, setPostContent] = useState("");
   const [submittingPost, setSubmittingPost] = useState(false);
   const [errorStatus, setErrorStatus] = useState<number | null>(null);
+  const [memberEmail, setMemberEmail] = useState("");
+  const [invitingMember, setInvitingMember] = useState(false);
 
   const fetchTeam = async () => {
     if (!id) return;
@@ -51,6 +53,24 @@ export default function TeamDetail() {
       toast.error(error.response?.data?.message || "Failed to post update.");
     } finally {
       setSubmittingPost(false);
+    }
+  };
+
+  const handleInviteMember = async (e: any) => {
+    e.preventDefault();
+    if (!memberEmail.trim()) return;
+    try {
+      setInvitingMember(true);
+      const res = await axiosInstance.post(`/teams/${id}/add-member`, {
+        email: memberEmail,
+      });
+      setTeam(res.data.data);
+      setMemberEmail("");
+      toast.success(res.data.message || "Member added successfully!");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to add member.");
+    } finally {
+      setInvitingMember(false);
     }
   };
 
