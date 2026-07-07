@@ -1,0 +1,12 @@
+Subject: [StackOverflow Clone] Password Reset Request
+
+Hello Tag Tester,
+
+Your password has been reset successfully.
+
+Your temporary password is: JEOcoXjpdT
+
+Please log in and update your password immediately.
+
+Best regards,
+StackOverflow Clone Team

@@ -18,4 +18,22 @@ axiosInstance.interceptors.request.use((req) => {
   }
   return req;
 });
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (typeof window !== "undefined" && error.response?.status === 401) {
+      const msg = error.response?.data?.message || "";
+      if (
+        msg.toLowerCase().includes("token") || 
+        msg.toLowerCase().includes("authentication required")
+      ) {
+        localStorage.removeItem("user");
+        window.location.href = "/auth";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default axiosInstance;
