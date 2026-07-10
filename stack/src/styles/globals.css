@@ -133,3 +133,99 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* ============================================================
+   DARK MODE — Global overrides for hardcoded colors
+   Applied when <html> has class="dark"
+   ============================================================ */
+
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ── Layout shells ── */
+.dark body {
+  background-color: #0f1117;
+  color: #e2e8f0;
+}
+
+.dark main.flex-1 {
+  background-color: #1a1d27 !important;
+  color: #e2e8f0;
+}
+
+/* ── Cards / white panels ── */
+.dark .bg-white {
+  background-color: #1e2130 !important;
+  color: #e2e8f0;
+}
+
+/* ── Borders ── */
+.dark .border-gray-200 { border-color: #2d3448 !important; }
+.dark .border-gray-100 { border-color: #2d3448 !important; }
+.dark .border-gray-300 { border-color: #374151 !important; }
+
+/* ── Text colors ── */
+.dark .text-gray-900 { color: #f1f5f9 !important; }
+.dark .text-gray-800 { color: #e2e8f0 !important; }
+.dark .text-gray-700 { color: #cbd5e1 !important; }
+.dark .text-gray-600 { color: #94a3b8 !important; }
+.dark .text-gray-500 { color: #64748b !important; }
+
+/* ── Background tints ── */
+.dark .bg-gray-50  { background-color: #171b27 !important; }
+.dark .bg-gray-100 { background-color: #1e2130 !important; }
+.dark .bg-gray-200 { background-color: #262b3d !important; }
+
+/* ── Hover states ── */
+.dark .hover\:bg-gray-50:hover  { background-color: #262b3d !important; }
+.dark .hover\:bg-gray-100:hover { background-color: #262b3d !important; }
+.dark .hover\:bg-gray-200:hover { background-color: #2d3448 !important; }
+
+/* ── Soft colored panels ── */
+.dark .bg-green-50   { background-color: #0f2318 !important; }
+.dark .bg-red-50     { background-color: #2a0f0f !important; }
+.dark .bg-purple-50  { background-color: #1a1030 !important; }
+.dark .bg-blue-50    { background-color: #0f1d2e !important; }
+.dark .bg-orange-50  { background-color: #1f1508 !important; }
+.dark .bg-amber-50   { background-color: #1f1508 !important; }
+.dark .bg-green-100  { background-color: #0d2016 !important; }
+.dark .bg-red-100    { background-color: #280e0e !important; }
+.dark .bg-purple-100 { background-color: #190f2e !important; }
+.dark .bg-blue-100   { background-color: #0d1b2b !important; }
+.dark .bg-orange-100 { background-color: #1f1408 !important; }
+
+/* ── Form inputs ── */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="tel"],
+.dark input[type="number"],
+.dark textarea,
+.dark select {
+  background-color: #1e2130 !important;
+  border-color: #374151 !important;
+  color: #e2e8f0 !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* ── Shadows ── */
+.dark .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important; }
+.dark .shadow-md { box-shadow: 0 4px 8px rgba(0,0,0,0.6) !important; }
+
+/* ── Dividers ── */
+.dark hr { border-color: #2d3448; }
+
+/* ── Code blocks ── */
+.dark code { background-color: #262b3d; color: #f9a8d4; }
+.dark pre  { background-color: #0d1117 !important; }
+
+/* ── Toast notifications ── */
+.dark .Toastify__toast {
+  background-color: #1e2130 !important;
+  color: #e2e8f0 !important;
+}
+

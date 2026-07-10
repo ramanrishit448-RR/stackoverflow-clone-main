@@ -19,7 +19,7 @@ const Mainlayout = ({ children }: MainlayoutProps) => {
   };
 
   return (
-    <div className="relative bg-[#f8f9fa] text-[#3a3a3a] min-h-screen">
+    <div className="relative bg-[#f8f9fa] dark:bg-[#0f1117] text-[#3a3a3a] dark:text-gray-200 min-h-screen transition-colors duration-300">
       <Navbar handleslidein={handleslidein} />
       {sidebarOpen && (
         <div
@@ -29,10 +29,10 @@ const Mainlayout = ({ children }: MainlayoutProps) => {
       )}
       <div className="flex flex-col md:flex-row max-w-full">
         <Sidebar isopen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <main className="flex-1 min-w-0 w-full p-4 lg:p-6 bg-white">
+        <main className="flex-1 min-w-0 w-full p-4 lg:p-6 bg-white dark:bg-[#1a1d27] transition-colors duration-300">
           {children}
         </main>
-        <div className="hidden lg:block border-l border-gray-200">
+        <div className="hidden lg:block border-l border-gray-200 dark:border-gray-700">
           <RightSideBar />
         </div>
       </div>
