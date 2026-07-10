@@ -135,97 +135,160 @@ body {
 }
 
 /* ============================================================
-   DARK MODE — Global overrides for hardcoded colors
-   Applied when <html> has class="dark"
+   DARK MODE — Global overrides
+   Activated when <html class="dark"> is set by ThemeContext
    ============================================================ */
 
 html {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ── Layout shells ── */
+/* ── Body & layout shells ─────────────────────────────────── */
 .dark body {
   background-color: #0f1117;
   color: #e2e8f0;
 }
-
 .dark main.flex-1 {
-  background-color: #1a1d27 !important;
+  background-color: #13151f !important;
   color: #e2e8f0;
 }
 
-/* ── Cards / white panels ── */
-.dark .bg-white {
-  background-color: #1e2130 !important;
-  color: #e2e8f0;
+/* ── THE BIG FIX: collapse ALL gradient backgrounds ─────────
+   Tailwind v4 inlines gradient stops as CSS custom properties
+   on each element — they cannot be overridden from a parent
+   class selector. Stripping the gradient image and applying a
+   flat dark bg is the only reliable approach.                 */
+.dark [class*="bg-gradient-"] {
+  background-image: none !important;
+  background-color: #1e2232 !important;
 }
 
-/* ── Borders ── */
+/* ── White / near-white panels ──────────────────────────────*/
+.dark .bg-white        { background-color: #1e2232 !important; color: #e2e8f0; }
+.dark .bg-\[#f8f9fa\]  { background-color: #161922 !important; }
+.dark .bg-\[#f1f2f3\]  { background-color: #161922 !important; }
+
+/* ── Grey spectrum ───────────────────────────────────────── */
+.dark .bg-gray-50  { background-color: #181c28 !important; }
+.dark .bg-gray-100 { background-color: #1e2232 !important; }
+.dark .bg-gray-200 { background-color: #262b3d !important; }
+.dark .bg-gray-800 { background-color: #1e2232 !important; }
+.dark .bg-gray-900 { background-color: #13151f !important; }
+
+/* ── Coloured tint panels ───────────────────────────────── */
+.dark .bg-green-50    { background-color: #0c1f16 !important; }
+.dark .bg-green-100   { background-color: #0a1c13 !important; }
+.dark .bg-red-50      { background-color: #220d0d !important; }
+.dark .bg-red-100     { background-color: #1e0c0c !important; }
+.dark .bg-orange-50   { background-color: #1c1308 !important; }
+.dark .bg-orange-100  { background-color: #1a1106 !important; }
+.dark .bg-amber-50    { background-color: #1c1308 !important; }
+.dark .bg-amber-100   { background-color: #1a1106 !important; }
+.dark .bg-yellow-50   { background-color: #1c1c08 !important; }
+.dark .bg-yellow-100  { background-color: #1a1a06 !important; }
+.dark .bg-blue-50     { background-color: #0c1528 !important; }
+.dark .bg-blue-100    { background-color: #0a1220 !important; }
+.dark .bg-purple-50   { background-color: #160e28 !important; }
+.dark .bg-purple-100  { background-color: #130c24 !important; }
+.dark .bg-indigo-50   { background-color: #0f1228 !important; }
+.dark .bg-pink-50     { background-color: #220e1a !important; }
+
+/* ── Borders ─────────────────────────────────────────────── */
+.dark .border-gray-100 { border-color: #252a3a !important; }
 .dark .border-gray-200 { border-color: #2d3448 !important; }
-.dark .border-gray-100 { border-color: #2d3448 !important; }
 .dark .border-gray-300 { border-color: #374151 !important; }
+.dark .border-green-200  { border-color: #14391e !important; }
+.dark .border-red-200    { border-color: #3d1a1a !important; }
+.dark .border-orange-200 { border-color: #3d2210 !important; }
+.dark .border-purple-200 { border-color: #2d1a4a !important; }
+.dark .border-blue-200   { border-color: #1a2a4a !important; }
 
-/* ── Text colors ── */
+/* ── Text ────────────────────────────────────────────────── */
 .dark .text-gray-900 { color: #f1f5f9 !important; }
 .dark .text-gray-800 { color: #e2e8f0 !important; }
 .dark .text-gray-700 { color: #cbd5e1 !important; }
 .dark .text-gray-600 { color: #94a3b8 !important; }
 .dark .text-gray-500 { color: #64748b !important; }
 
-/* ── Background tints ── */
-.dark .bg-gray-50  { background-color: #171b27 !important; }
-.dark .bg-gray-100 { background-color: #1e2130 !important; }
-.dark .bg-gray-200 { background-color: #262b3d !important; }
+/* Text inside gradient panels that was designed for dark bg  */
+.dark .text-orange-50  { color: #fed7aa !important; }
+.dark .text-orange-100 { color: #fdba74 !important; }
 
-/* ── Hover states ── */
-.dark .hover\:bg-gray-50:hover  { background-color: #262b3d !important; }
-.dark .hover\:bg-gray-100:hover { background-color: #262b3d !important; }
-.dark .hover\:bg-gray-200:hover { background-color: #2d3448 !important; }
+/* ── Green tint text (inside green panels) ───────────────── */
+.dark .text-green-800  { color: #86efac !important; }
+.dark .text-green-700  { color: #6ee7b7 !important; }
+.dark .text-green-700  { color: #4ade80 !important; }
 
-/* ── Soft colored panels ── */
-.dark .bg-green-50   { background-color: #0f2318 !important; }
-.dark .bg-red-50     { background-color: #2a0f0f !important; }
-.dark .bg-purple-50  { background-color: #1a1030 !important; }
-.dark .bg-blue-50    { background-color: #0f1d2e !important; }
-.dark .bg-orange-50  { background-color: #1f1508 !important; }
-.dark .bg-amber-50   { background-color: #1f1508 !important; }
-.dark .bg-green-100  { background-color: #0d2016 !important; }
-.dark .bg-red-100    { background-color: #280e0e !important; }
-.dark .bg-purple-100 { background-color: #190f2e !important; }
-.dark .bg-blue-100   { background-color: #0d1b2b !important; }
-.dark .bg-orange-100 { background-color: #1f1408 !important; }
+/* ── Red tint text ───────────────────────────────────────── */
+.dark .text-red-800 { color: #fca5a5 !important; }
+.dark .text-red-700 { color: #f87171 !important; }
 
-/* ── Form inputs ── */
+/* ── Purple tint text ────────────────────────────────────── */
+.dark .text-purple-900 { color: #d8b4fe !important; }
+.dark .text-purple-800 { color: #c4b5fd !important; }
+
+/* ── Hover backgrounds ───────────────────────────────────── */
+.dark .hover\:bg-gray-50:hover   { background-color: #262b3d !important; }
+.dark .hover\:bg-gray-100:hover  { background-color: #262b3d !important; }
+.dark .hover\:bg-gray-200:hover  { background-color: #2d3448 !important; }
+.dark .hover\:bg-green-50:hover  { background-color: #0c1f16 !important; }
+
+/* ── Form inputs & controls ──────────────────────────────── */
 .dark input[type="text"],
 .dark input[type="email"],
 .dark input[type="password"],
 .dark input[type="tel"],
 .dark input[type="number"],
+.dark input[type="search"],
 .dark textarea,
 .dark select {
-  background-color: #1e2130 !important;
+  background-color: #1e2232 !important;
   border-color: #374151 !important;
   color: #e2e8f0 !important;
 }
 .dark input::placeholder,
-.dark textarea::placeholder {
-  color: #6b7280 !important;
+.dark textarea::placeholder { color: #6b7280 !important; }
+.dark input:focus,
+.dark textarea:focus {
+  border-color: #f97316 !important;
+  box-shadow: 0 0 0 2px rgba(249,115,22,0.25) !important;
 }
 
-/* ── Shadows ── */
-.dark .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important; }
-.dark .shadow-md { box-shadow: 0 4px 8px rgba(0,0,0,0.6) !important; }
+/* ── Shadows ─────────────────────────────────────────────── */
+.dark .shadow-sm  { box-shadow: 0 1px 4px rgba(0,0,0,0.55) !important; }
+.dark .shadow-md  { box-shadow: 0 4px 12px rgba(0,0,0,0.65) !important; }
 
-/* ── Dividers ── */
+/* ── Dividers ────────────────────────────────────────────── */
 .dark hr { border-color: #2d3448; }
 
-/* ── Code blocks ── */
-.dark code { background-color: #262b3d; color: #f9a8d4; }
-.dark pre  { background-color: #0d1117 !important; }
-
-/* ── Toast notifications ── */
-.dark .Toastify__toast {
-  background-color: #1e2130 !important;
+/* ── Dropdowns / popovers ────────────────────────────────── */
+.dark [role="listbox"],
+.dark [role="menu"] {
+  background-color: #1e2232 !important;
+  border-color: #2d3448 !important;
   color: #e2e8f0 !important;
 }
 
+/* ── Code ────────────────────────────────────────────────── */
+.dark code { background-color: #262b3d; color: #f9a8d4; padding: 0 3px; border-radius: 4px; }
+.dark pre  { background-color: #0d1117 !important; border-color: #2d3448 !important; }
+
+/* ── Toasts ──────────────────────────────────────────────── */
+.dark .Toastify__toast {
+  background-color: #1e2232 !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #2d3448;
+}
+.dark .Toastify__close-button { color: #94a3b8 !important; }
+
+/* ── Right sidebar special panels (yellow, tan) ──────────── */
+.dark .bg-\[\#fdf6e3\],
+.dark .bg-\[\#fffbf0\],
+.dark .bg-\[\#fef9ee\] { background-color: #1c1c0e !important; }
+
+/* ── Dialogs / modals ────────────────────────────────────── */
+.dark [role="dialog"] {
+  background-color: #1e2232 !important;
+  color: #e2e8f0 !important;
+  border-color: #2d3448 !important;
+}
