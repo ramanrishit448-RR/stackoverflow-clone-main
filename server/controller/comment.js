@@ -70,12 +70,18 @@ export const addComment = async (req, res) => {
     const post = await Post.findOne({ _id: req.params.postId, isRemoved: false });
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    const user = await User.findById(req.userid).select("name isSuspended suspendedUntil");
+    const user = await User.findById(req.userid).select("name isSuspended suspendedUntil reputation");
     if (
       user?.isSuspended &&
       (!user.suspendedUntil || user.suspendedUntil > new Date())
     ) {
       return res.status(403).json({ message: "Your account is suspended" });
+    }
+
+    if ((user?.reputation || 0) < 50 && post.authorId.toString() !== req.userid) {
+      return res.status(403).json({
+        message: "You need at least 50 reputation points to comment on other users' posts"
+      });
     }
 
     if (parentId) {

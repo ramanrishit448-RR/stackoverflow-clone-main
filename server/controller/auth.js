@@ -3,6 +3,8 @@ import user from "../models/auth.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { sendEmail, sendSMS } from "../utils/delivery.js";
+import ReputationHistory from "../models/reputationHistory.js";
+import { updateReputation } from "../utils/reputation.js";
 
 const sanitizeUser = (doc) => {
   const obj = doc.toObject ? doc.toObject() : doc;
@@ -165,22 +167,45 @@ export const updateprofile = async (req, res) => {
     return res.status(400).json({ message: "User unavailable" });
   }
   try {
-    const updateprofile = await user
-      .findByIdAndUpdate(
-        _id,
-        {
-          $set: {
-            name,
-            about,
-            tags,
-            emailNotifications,
-            smsNotifications,
-          },
-        },
-        { new: true },
-      )
-      .select("-password");
-    res.status(200).json({ data: updateprofile });
+    const existingUser = await user.findById(_id);
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    existingUser.name = name || existingUser.name;
+    existingUser.about = about || existingUser.about;
+    existingUser.tags = tags || existingUser.tags;
+    if (emailNotifications !== undefined) {
+      existingUser.emailNotifications = emailNotifications;
+    }
+    if (smsNotifications !== undefined) {
+      existingUser.smsNotifications = smsNotifications;
+    }
+
+    const isComplete =
+      existingUser.name &&
+      existingUser.about &&
+      existingUser.phone &&
+      existingUser.tags &&
+      existingUser.tags.length > 0;
+
+    if (isComplete && !existingUser.profileCompletionBonusAwarded) {
+      existingUser.profileCompletionBonusAwarded = true;
+      existingUser.reputation = (existingUser.reputation || 0) + 10;
+      await existingUser.save();
+
+      const logEntry = new ReputationHistory({
+        userId: _id,
+        change: 10,
+        reason: "Completed user profile with all mandatory details",
+        type: "profile_completed",
+      });
+      await logEntry.save();
+    } else {
+      await existingUser.save();
+    }
+
+    res.status(200).json({ data: sanitizeUser(existingUser) });
   } catch (error) {
     console.log(error);
     res.status(500).json("something went wrong..");
@@ -197,6 +222,137 @@ export const getProfile = async (req, res) => {
     return res.status(200).json({ data: currentUser });
   } catch (error) {
     console.error("Get profile failed:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const transferReputation = async (req, res) => {
+  const { receiverId, amount, reason } = req.body;
+  const senderId = req.userid;
+
+  if (!mongoose.Types.ObjectId.isValid(receiverId)) {
+    return res.status(400).json({ message: "Invalid receiver ID" });
+  }
+  if (String(senderId) === String(receiverId)) {
+    return res.status(400).json({ message: "Cannot transfer reputation to yourself" });
+  }
+
+  const transferAmount = parseInt(amount);
+  if (isNaN(transferAmount) || transferAmount <= 0) {
+    return res.status(400).json({ message: "Transfer amount must be a positive integer" });
+  }
+  if (transferAmount > 50) {
+    return res.status(400).json({ message: "Maximum transfer limit of 50 points per transaction" });
+  }
+  if (!reason || !reason.trim()) {
+    return res.status(400).json({ message: "Reason for transfer is required" });
+  }
+
+  try {
+    const sender = await user.findById(senderId);
+    const receiver = await user.findById(receiverId);
+
+    if (!sender) return res.status(404).json({ message: "Sender not found" });
+    if (!receiver) return res.status(404).json({ message: "Receiver not found" });
+
+    if ((sender.reputation || 0) <= 50) {
+      return res.status(400).json({ message: "You need more than 50 reputation points to transfer" });
+    }
+    if ((sender.reputation || 0) - transferAmount < 0) {
+      return res.status(400).json({ message: "Insufficient reputation points" });
+    }
+
+    // Validate daily transfer limit (max 100 points per day)
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const ReputationTransfer = (await import("../models/reputationTransfer.js")).default;
+    const sentToday = await ReputationTransfer.find({
+      senderId,
+      timestamp: { $gte: startOfToday }
+    });
+
+    const totalSentToday = sentToday.reduce((sum, txn) => sum + txn.amount, 0);
+    if (totalSentToday + transferAmount > 100) {
+      return res.status(400).json({
+        message: `Daily transfer limit exceeded. You have already transferred ${totalSentToday} points today. Max daily limit is 100.`
+      });
+    }
+
+    // Deduct from sender
+    sender.reputation = (sender.reputation || 0) - transferAmount;
+    await sender.save();
+
+    const senderLog = new ReputationHistory({
+      userId: senderId,
+      change: -transferAmount,
+      reason: `Transferred points to ${receiver.name}: ${reason}`,
+      type: "transfer_sent"
+    });
+    await senderLog.save();
+
+    // Add to receiver
+    receiver.reputation = (receiver.reputation || 0) + transferAmount;
+    await receiver.save();
+
+    const receiverLog = new ReputationHistory({
+      userId: receiverId,
+      change: transferAmount,
+      reason: `Received points from ${sender.name}: ${reason}`,
+      type: "transfer_received"
+    });
+    await receiverLog.save();
+
+    // Record transaction
+    const transaction = new ReputationTransfer({
+      senderId,
+      receiverId,
+      amount: transferAmount,
+      reason: reason.trim()
+    });
+    await transaction.save();
+
+    return res.status(200).json({
+      message: `Transferred ${transferAmount} points successfully to ${receiver.name}!`,
+      senderReputation: sender.reputation
+    });
+  } catch (error) {
+    console.error("Transfer reputation failed:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const getReputationHistory = async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid user ID" });
+  }
+  try {
+    const history = await ReputationHistory.find({ userId: id }).sort({ timestamp: -1 });
+    return res.status(200).json({ data: history });
+  } catch (error) {
+    console.error("Get reputation history failed:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const getReputationTransfers = async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid user ID" });
+  }
+  try {
+    const ReputationTransfer = (await import("../models/reputationTransfer.js")).default;
+    const transfers = await ReputationTransfer.find({
+      $or: [{ senderId: id }, { receiverId: id }]
+    })
+    .populate("senderId", "name email")
+    .populate("receiverId", "name email")
+    .sort({ timestamp: -1 });
+
+    return res.status(200).json({ data: transfers });
+  } catch (error) {
+    console.error("Get reputation transfers failed:", error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };

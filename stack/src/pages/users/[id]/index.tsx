@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Mainlayout from "@/layout/Mainlayout";
 import { useAuth } from "@/lib/AuthContext";
 import axiosInstance from "@/lib/axiosinstance";
-import { Calendar, Edit, Plus, X, Award, ShieldAlert, CreditCard, HelpCircle, Mail, Download, Check, Users, BookOpen, MessageSquare, Rss } from "lucide-react";
+import { Calendar, Edit, Plus, X, Award, ShieldAlert, CreditCard, HelpCircle, Mail, Download, Check, Users, BookOpen, MessageSquare, Rss, History } from "lucide-react";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -43,6 +43,14 @@ const index = () => {
   const [newTag, setNewTag] = useState("");
   const [following, setFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
+
+  // Reputation States
+  const [reputationHistory, setReputationHistory] = useState<any[]>([]);
+  const [reputationTransfers, setReputationTransfers] = useState<any[]>([]);
+  const [loadingReputation, setLoadingReputation] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferReason, setTransferReason] = useState("");
 
   // Billing & Invoices state
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -145,13 +153,61 @@ const index = () => {
         setloading(false);
       }
     };
+    const fetchReputationData = async () => {
+      if (!id) return;
+      try {
+        setLoadingReputation(true);
+        const historyRes = await axiosInstance.get(`/user/reputation/history/${id}`);
+        setReputationHistory(historyRes.data.data || []);
+        
+        const transfersRes = await axiosInstance.get(`/user/reputation/transfers/${id}`);
+        setReputationTransfers(transfersRes.data.data || []);
+      } catch (err) {
+        console.error("Failed to fetch reputation data:", err);
+      } finally {
+        setLoadingReputation(false);
+      }
+    };
+
     fetchuser();
     fetchUserActivity();
+    fetchReputationData();
     
     if (id && user && id === user._id) {
       fetchInvoices();
     }
   }, [id, user]);
+
+  const handleTransferSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await axiosInstance.post("/user/reputation/transfer", {
+        receiverId: id,
+        amount: transferAmount,
+        reason: transferReason
+      });
+      
+      if (res.data) {
+        toast.success(res.data.message);
+        setIsTransferModalOpen(false);
+        setTransferAmount("");
+        setTransferReason("");
+        
+        const resUser = await axiosInstance.get("/user/getalluser");
+        const matcheduser = resUser.data.data.find((u: any) => u._id === id);
+        setusers(matcheduser);
+        
+        // Refresh history and parent user context
+        const historyRes = await axiosInstance.get(`/user/reputation/history/${id}`);
+        setReputationHistory(historyRes.data.data || []);
+        const transfersRes = await axiosInstance.get(`/user/reputation/transfers/${id}`);
+        setReputationTransfers(transfersRes.data.data || []);
+        refreshUser();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to transfer points");
+    }
+  };
 
   const handleFollow = async () => {
     if (!user) {
@@ -449,6 +505,9 @@ const index = () => {
                   {activePlan === "gold" && <Award className="w-6 h-6 text-yellow-500 fill-current animate-pulse" />}
                   {activePlan === "silver" && <Award className="w-6 h-6 text-slate-400 fill-current" />}
                   {activePlan === "bronze" && <Award className="w-6 h-6 text-amber-700 fill-current" />}
+                  <Badge className="bg-orange-500 text-white font-bold text-xs px-2 py-0.5 rounded-full ml-1">
+                    {users.reputation || 0} Rep
+                  </Badge>
                 </h1>
                 <p className="text-sm text-gray-500 font-medium">@{users.email.split("@")[0]}</p>
               </div>
@@ -595,6 +654,16 @@ const index = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab("reputation")}
+            className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === "reputation" ? "border-orange-500 text-orange-600" : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <Award className="w-3.5 h-3.5" />
+            Reputation
+          </button>
+
+          <button
             onClick={() => setActiveTab("activity")}
             className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === "activity" ? "border-orange-500 text-orange-600" : "border-transparent text-gray-500 hover:text-gray-700"
@@ -642,7 +711,7 @@ const index = () => {
         {/* Tab 1: Profile View */}
         {activeTab === "profile" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+            <div className="space-y-6">
               <Card className="border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-lg">About Me</CardTitle>
@@ -690,6 +759,161 @@ const index = () => {
                 </CardContent>
               </Card>
             </div>
+          </div>
+        )}
+
+        {/* Tab: Reputation History & Transfer */}
+        {activeTab === "reputation" && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-50 border border-gray-200 rounded-3xl p-6 shadow-sm">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Reputation Overview</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Manage points and view how they were earned or lost.
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="bg-orange-100 text-orange-800 rounded-2xl px-5 py-3 text-center border border-orange-200">
+                  <span className="text-xs uppercase font-semibold text-orange-600 block">Total Points</span>
+                  <span className="text-3xl font-black">{users.reputation || 0}</span>
+                </div>
+                
+                {!isOwnProfile && user && (user.reputation || 0) > 50 && (
+                  <Dialog open={isTransferModalOpen} onOpenChange={setIsTransferModalOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold">
+                        Transfer Reputation
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-white text-gray-900">
+                      <DialogHeader>
+                        <DialogTitle>Transfer Reputation Points</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleTransferSubmit} className="space-y-4 py-4">
+                        <div className="bg-orange-50 border border-orange-100 rounded-xl p-3 text-xs text-orange-800">
+                          <p className="font-semibold">Transfer Rules:</p>
+                          <ul className="list-disc pl-4 mt-1 space-y-1">
+                            <li>You can transfer up to 50 points per transaction.</li>
+                            <li>Daily transfer limit is 100 points.</li>
+                            <li>Your reputation will decrease by the transferred amount.</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <Label htmlFor="transferAmount">Amount (Max 50)</Label>
+                          <Input
+                            id="transferAmount"
+                            type="number"
+                            min="1"
+                            max="50"
+                            value={transferAmount}
+                            onChange={(e) => setTransferAmount(e.target.value)}
+                            required
+                            className="h-10 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="transferReason">Reason for transfer</Label>
+                          <Textarea
+                            id="transferReason"
+                            placeholder="e.g. Helpful help during backend testing"
+                            value={transferReason}
+                            onChange={(e) => setTransferReason(e.target.value)}
+                            required
+                            className="min-h-20"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-3 pt-3 border-t">
+                          <Button type="button" variant="outline" onClick={() => setIsTransferModalOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button type="submit" className="bg-orange-600 text-white">
+                            Confirm Transfer
+                          </Button>
+                        </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+            </div>
+
+            {loadingReputation ? (
+              <div className="flex justify-center py-12">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Reputation Activity History */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-gray-800 border-b border-gray-150 pb-2 flex items-center gap-1.5">
+                    <Award className="w-4 h-4 text-orange-500" />
+                    Activity History ({reputationHistory.length})
+                  </h3>
+                  {reputationHistory.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic py-4">No reputation activity logged yet.</p>
+                  ) : (
+                    <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                      {reputationHistory.map((item) => (
+                        <div key={item._id} className="p-4 rounded-xl border border-gray-200 bg-white shadow-sm flex justify-between items-center">
+                          <div>
+                            <p className="text-xs font-semibold text-gray-800">{item.reason}</p>
+                            <span className="text-[10px] text-gray-400 block mt-1">
+                              {new Date(item.timestamp).toLocaleString()}
+                            </span>
+                          </div>
+                          <span className={`text-sm font-black px-2 py-1 rounded-lg ${
+                            item.change >= 0 
+                              ? "bg-green-50 text-green-700" 
+                              : "bg-red-50 text-red-700"
+                          }`}>
+                            {item.change >= 0 ? `+${item.change}` : item.change}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Reputation Transaction History */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-gray-800 border-b border-gray-150 pb-2 flex items-center gap-1.5">
+                    <History className="w-4 h-4 text-blue-500" />
+                    Transaction History ({reputationTransfers.length})
+                  </h3>
+                  {reputationTransfers.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic py-4">No points transfer transactions logged.</p>
+                  ) : (
+                    <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                      {reputationTransfers.map((item) => {
+                        const senderIdStr = typeof item.senderId === 'object' ? item.senderId?._id : item.senderId;
+                        const isSender = senderIdStr === id;
+                        return (
+                          <div key={item._id} className="p-4 rounded-xl border border-gray-200 bg-white shadow-sm space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-bold text-gray-700">
+                                {isSender ? "Sent to: " : "Received from: "}
+                                <span className="text-blue-600">
+                                  {isSender ? item.receiverId?.name : item.senderId?.name}
+                                </span>
+                              </span>
+                              <span className={`text-xs font-extrabold px-2 py-0.5 rounded-full ${
+                                isSender ? "bg-orange-50 text-orange-700" : "bg-green-50 text-green-700"
+                              }`}>
+                                {isSender ? `-${item.amount} pts` : `+${item.amount} pts`}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500 italic">" {item.reason} "</p>
+                            <span className="text-[9px] text-gray-400 block">
+                              {new Date(item.timestamp).toLocaleString()}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

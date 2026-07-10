@@ -29,16 +29,25 @@ export const reviewReport = async (req, res) => {
     report.reviewedBy = req.userid;
     await report.save();
 
-    if (removePost) {
-      await Post.findByIdAndUpdate(report.postId, {
-        isRemoved: true,
-        removedReason: adminNote || "Removed by admin",
-      });
-    }
+    const post = await Post.findById(report.postId);
+    if (post) {
+      if (removePost && !post.isRemoved) {
+        post.isRemoved = true;
+        post.removedReason = adminNote || "Removed by admin";
+        await post.save();
 
-    if (suspendUser) {
-      const post = await Post.findById(report.postId);
-      if (post) {
+        if (post.authorId) {
+          const { updateReputation } = await import("../utils/reputation.js");
+          await updateReputation(
+            post.authorId,
+            -10,
+            "Content removed by administrator due to guideline violations",
+            "admin_removal"
+          );
+        }
+      }
+
+      if (suspendUser) {
         const offender = await User.findById(post.authorId);
         if (offender) {
           offender.violationCount += 1;
@@ -65,13 +74,25 @@ export const removePostAdmin = async (req, res) => {
       return res.status(400).json({ message: "Invalid post id" });
     }
 
-    const post = await Post.findByIdAndUpdate(
-      req.params.id,
-      { isRemoved: true, removedReason: req.body.reason || "Removed by admin" },
-      { new: true }
-    );
-
+    const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
+
+    if (!post.isRemoved) {
+      post.isRemoved = true;
+      post.removedReason = req.body.reason || "Removed by admin";
+      await post.save();
+
+      if (post.authorId) {
+        const { updateReputation } = await import("../utils/reputation.js");
+        await updateReputation(
+          post.authorId,
+          -10,
+          "Content removed by administrator due to guideline violations",
+          "admin_removal"
+        );
+      }
+    }
+
     res.status(200).json({ message: "Post removed" });
   } catch (error) {
     res.status(500).json({ message: "Failed to remove post" });

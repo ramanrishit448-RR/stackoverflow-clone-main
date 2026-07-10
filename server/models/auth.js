@@ -24,5 +24,7 @@ const userschema = mongoose.Schema({
   billingName: { type: String },
   billingEmail: { type: String },
   billingAddress: { type: String },
+  reputation: { type: Number, default: 0 },
+  profileCompletionBonusAwarded: { type: Boolean, default: false },
 });
 export default mongoose.model("user", userschema);

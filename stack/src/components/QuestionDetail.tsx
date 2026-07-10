@@ -7,6 +7,7 @@ import {
   History,
   Share,
   Trash,
+  Check,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "./ui/card";
@@ -172,6 +173,64 @@ const QuestionDetail = ({ questionId }: any) => {
       toast.error("Failed to delete question");
     }
   };
+  const handleAnswerVote = async (answerId: string, vote: string) => {
+    if (!user) {
+      toast.info("Please login to continue");
+      router.push("/auth");
+      return;
+    }
+    try {
+      const res = await axiosInstance.patch(`/answer/vote/${question._id}/${answerId}`, {
+        value: vote
+      });
+      if (res.data.data) {
+        setquestion(res.data.data);
+        setanswer(res.data.data.answer);
+        toast.success("Answer Vote Updated");
+      }
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to vote answer");
+    }
+  };
+
+  const handleAcceptAnswer = async (answerId: string) => {
+    if (!user) {
+      toast.info("Please login to continue");
+      router.push("/auth");
+      return;
+    }
+    try {
+      const res = await axiosInstance.patch(`/answer/accept/${question._id}/${answerId}`);
+      if (res.data.data) {
+        setquestion(res.data.data);
+        setanswer(res.data.data.answer);
+        toast.success("Accepted Answer Updated");
+      }
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to accept answer");
+    }
+  };
+
+  const handleCloseQuestion = async () => {
+    if (!user) {
+      toast.info("Please login to continue");
+      router.push("/auth");
+      return;
+    }
+    if (!window.confirm("Are you sure you want to vote to close this question?")) return;
+    try {
+      const res = await axiosInstance.patch(`/question/close/${question._id}`);
+      if (res.data.data) {
+        setquestion(res.data.data);
+        toast.success(res.data.message || "Close vote registered");
+      }
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to close question");
+    }
+  };
 
   return (
     <div className="max-w-5xl">
@@ -238,6 +297,13 @@ const QuestionDetail = ({ questionId }: any) => {
               </div>
             </div>
             <div className="flex-1 p-4 sm:p-6">
+              {question.isClosed && (
+                <div className="bg-orange-50 border-l-4 border-orange-500 p-4 mb-4 rounded-r-lg">
+                  <p className="text-orange-800 text-sm font-semibold">
+                    Closed by community vote. No new answers can be posted.
+                  </p>
+                </div>
+              )}
               <div className="prose max-w-none mb-6">
                 <div
                   className="text-gray-800 leading-relaxed"
@@ -306,6 +372,18 @@ const QuestionDetail = ({ questionId }: any) => {
                       Delete
                     </Button>
                   )}
+                  {user && !question.isClosed && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCloseQuestion}
+                      className="text-orange-600 hover:text-orange-800"
+                      title="Vote to close this question"
+                    >
+                      <Flag className="w-4 h-4 mr-1" />
+                      Vote to Close ({question.closeVotes?.length || 0}/3)
+                    </Button>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2 text-sm">
@@ -346,6 +424,49 @@ const QuestionDetail = ({ questionId }: any) => {
             <Card key={ans._id} className={""}>
               <CardContent className="p-0">
                 <div className="flex flex-col sm:flex-row">
+                  {/* Answer Voting & Acceptance Column */}
+                  <div className="flex sm:flex-col items-center p-4 sm:p-6 border-b sm:border-b-0 sm:border-r border-gray-200">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="p-2 text-gray-600 hover:text-orange-500"
+                      onClick={() => handleAnswerVote(ans._id, "upvote")}
+                    >
+                      <ChevronUp className="w-6 h-6" />
+                    </Button>
+                    <span className="font-bold text-gray-800">{(ans.upvote?.length || 0) - (ans.downvote?.length || 0)}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="p-2 text-gray-600 hover:text-orange-500"
+                      onClick={() => handleAnswerVote(ans._id, "downvote")}
+                    >
+                      <ChevronDown className="w-6 h-6" />
+                    </Button>
+                    <div className="mt-4">
+                      {question.userid === user?._id ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`p-2 rounded-full ${
+                            ans.isAccepted
+                              ? "text-green-600 bg-green-50 hover:bg-green-100"
+                              : "text-gray-400 hover:text-green-600"
+                          }`}
+                          onClick={() => handleAcceptAnswer(ans._id)}
+                          title="Toggle Accept Answer"
+                        >
+                          <Check className="w-6 h-6" />
+                        </Button>
+                      ) : (
+                        ans.isAccepted && (
+                          <div className="p-2 text-green-600 bg-green-50 rounded-full" title="Accepted Answer">
+                            <Check className="w-6 h-6" />
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
                   {/* Answer Content */}
                   <div className="flex-1 p-4 sm:p-6">
                     <div className="prose max-w-none mb-6">
@@ -433,39 +554,45 @@ const QuestionDetail = ({ questionId }: any) => {
           ))}
         </div>
       </div>
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900">
-            Your Answer
-          </h3>
-          <Textarea
-            placeholder="Write your answer here... You can use Markdown formatting."
-            value={newanswer}
-            onChange={(e) => setnewAnswer(e.target.value)}
-            className="min-h-32 mb-4 resize-none"
-          />
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <Button
-              onClick={handleSubmitanswer}
-              disabled={!newanswer.trim() || isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {isSubmitting ? "Posting..." : "Post Your Answer"}
-            </Button>
-            <p className="text-sm text-gray-600">
-              By posting your answer, you agree to the{" "}
-              <Link href="#" className="text-blue-600 hover:underline">
-                privacy policy
-              </Link>{" "}
-              and{" "}
-              <Link href="#" className="text-blue-600 hover:underline">
-                terms of service
-              </Link>
-              .
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {!question.isClosed ? (
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">
+              Your Answer
+            </h3>
+            <Textarea
+              placeholder="Write your answer here... You can use Markdown formatting."
+              value={newanswer}
+              onChange={(e) => setnewAnswer(e.target.value)}
+              className="min-h-32 mb-4 resize-none"
+            />
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <Button
+                onClick={handleSubmitanswer}
+                disabled={!newanswer.trim() || isSubmitting}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isSubmitting ? "Posting..." : "Post Your Answer"}
+              </Button>
+              <p className="text-sm text-gray-600">
+                By posting your answer, you agree to the{" "}
+                <Link href="#" className="text-blue-600 hover:underline">
+                  privacy policy
+                </Link>{" "}
+                and{" "}
+                <Link href="#" className="text-blue-600 hover:underline">
+                  terms of service
+                </Link>
+                .
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="text-center text-gray-500 py-8 border border-dashed border-gray-300 rounded-2xl bg-gray-50 font-medium">
+          This question is closed. It cannot accept any new answers.
+        </div>
+      )}
     </div>
   );
 };

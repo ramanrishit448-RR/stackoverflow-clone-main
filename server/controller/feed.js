@@ -12,7 +12,7 @@ import {
 const PAGE_SIZE = 10;
 
 const ensureActiveUser = async (userId) => {
-  const user = await User.findById(userId).select("isSuspended suspendedUntil name");
+  const user = await User.findById(userId).select("isSuspended suspendedUntil name reputation");
   if (!user) return { error: "User not found", status: 404 };
   if (
     user.isSuspended &&
@@ -186,8 +186,8 @@ export const updatePost = async (req, res) => {
 
     const post = await Post.findOne({ _id: req.params.id, isRemoved: false });
     if (!post) return res.status(404).json({ message: "Post not found" });
-    if (post.authorId.toString() !== req.userid) {
-      return res.status(403).json({ message: "You can only edit your own posts" });
+    if (post.authorId.toString() !== req.userid && (check.user.reputation || 0) < 100) {
+      return res.status(403).json({ message: "You must have at least 100 reputation points to edit community posts" });
     }
 
     const { content, type, codeSnippet, codeLanguage, projectUrl, projectTitle, images } =
@@ -369,6 +369,12 @@ export const reportPost = async (req, res) => {
 
     const post = await Post.findOne({ _id: req.params.id, isRemoved: false });
     if (!post) return res.status(404).json({ message: "Post not found" });
+
+    const currentUser = await User.findById(req.userid);
+    if (!currentUser) return res.status(404).json({ message: "User not found" });
+    if ((currentUser.reputation || 0) < 500) {
+      return res.status(403).json({ message: "You need at least 500 reputation points to report inappropriate content" });
+    }
 
     const existing = await Report.findOne({
       postId: post._id,
