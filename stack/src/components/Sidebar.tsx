@@ -9,7 +9,6 @@ import {
   Rss,
   Tag,
   Trophy,
-  Users,
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
@@ -70,16 +69,7 @@ const Sidebar = ({ isopen, onClose }: any) => {
                 Tags
               </Link>
             </li>
-            <li>
-              <Link
-                href="/users"
-                onClick={onClose}
-                className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
-              >
-                <Users className="w-4 h-4 mr-2 lg:mr-3" />
-                Users
-              </Link>
-            </li>
+
             <li>
               <Link
                 href="/feed/bookmarks"
