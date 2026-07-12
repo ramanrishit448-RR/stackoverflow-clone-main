@@ -1,5 +1,6 @@
 import Mainlayout from "@/layout/Mainlayout";
 import Link from "next/link";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const challenges = [
   {
@@ -23,28 +24,27 @@ const challenges = [
 ];
 
 export default function ChallengesPage() {
+  const { t } = useLanguage();
   return (
     <Mainlayout>
       <main className="min-w-0 p-4 lg:p-6">
         <div className="max-w-5xl mx-auto space-y-6">
-          <div className="rounded-3xl border border-orange-200 bg-orange-50 p-6 sm:p-8 shadow-sm">
+          <div className="rounded-3xl border border-orange-200 bg-orange-50 dark:bg-orange-950/20 p-6 sm:p-8 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <p className="text-sm text-orange-700 uppercase tracking-[0.2em]">
+                <p className="text-sm text-orange-700 dark:text-orange-400 uppercase tracking-[0.2em]">
                   Challenge
                 </p>
-                <h1 className="mt-2 text-2xl font-semibold text-slate-900">
-                  Today's challenges
+                <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+                  {t("Developer Challenges")}
                 </h1>
               </div>
-              <span className="rounded-full bg-orange-100 px-3 py-1 text-sm font-medium text-orange-700">
+              <span className="rounded-full bg-orange-100 dark:bg-orange-900/50 px-3 py-1 text-sm font-medium text-orange-700 dark:text-orange-400">
                 Ready to earn badges
               </span>
             </div>
-            <p className="mt-4 text-sm leading-7 text-slate-700">
-              Practice with short, hands-on tasks designed to improve your
-              frontend and backend skills. Each challenge includes guidance and
-              a clear goal so you can ship faster.
+            <p className="mt-4 text-sm leading-7 text-slate-700 dark:text-slate-300">
+              {t("Sharpen your coding skills with curated practice tasks.")}
             </p>
           </div>
 

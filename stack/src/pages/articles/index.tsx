@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useAuth } from "@/lib/AuthContext";
 import { Search, Heart, MessageSquare, BookOpen, PlusCircle } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const CATEGORIES = ["All", "Web Development", "Data Science", "DevOps", "AI / ML", "Career"];
 
 export default function ArticlesIndex() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const router = useRouter();
   const [articles, setArticles] = useState([]);
@@ -51,16 +53,16 @@ export default function ArticlesIndex() {
     <Mainlayout>
       <div className="mx-auto max-w-6xl space-y-8">
         {/* Hero Section */}
-        <section className="relative overflow-hidden rounded-3xl border border-orange-100 bg-gradient-to-br from-orange-50 via-white to-amber-50 p-8 shadow-sm">
+        <section className="relative overflow-hidden rounded-3xl border border-orange-100 dark:border-gray-800 bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:from-gray-800 dark:via-gray-900 dark:to-orange-950/10 p-8 shadow-sm">
           <div className="relative z-10 max-w-3xl">
-            <span className="inline-block rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-orange-600">
-              Developer Articles & Guides
+            <span className="inline-block rounded-full bg-orange-100 dark:bg-orange-900/50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+              {t("Articles")}
             </span>
-            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-              Write, share, and discover technical knowledge.
+            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl">
+              {t("Articles")}
             </h1>
-            <p className="mt-4 text-base text-gray-600 leading-relaxed">
-              Explore in-depth tutorials, architectural reviews, engineering insights, and career growth stories written by developers in the community.
+            <p className="mt-4 text-base text-gray-600 dark:text-gray-300 leading-relaxed">
+              {t("Explore developer stories, technical guides, and community insights.")}
             </p>
             <div className="mt-6">
               <button
@@ -68,7 +70,7 @@ export default function ArticlesIndex() {
                 className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-orange-600 hover:shadow transition-all duration-200"
               >
                 <PlusCircle className="h-4.5 w-4.5" />
-                Write an Article
+                {t("Create Article")}
               </button>
             </div>
           </div>

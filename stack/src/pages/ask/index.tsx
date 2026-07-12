@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Mainlayout from "@/layout/Mainlayout";
 import { useAuth } from "@/lib/AuthContext";
+import { useLanguage } from "@/lib/LanguageContext";
 import axiosInstance from "@/lib/axiosinstance";
 import { Plus, X } from "lucide-react";
 import { useRouter } from "next/router";
@@ -13,6 +14,7 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 
 const index = () => {
+  const { t } = useLanguage();
   const router = useRouter();
   const { user } = useAuth();
   const [formData, setFormData] = useState({
@@ -79,25 +81,24 @@ const index = () => {
     <Mainlayout>
       <div className="max-w-6xl mx-auto">
         <h1 className="text-xl lg:text-2xl font-semibold mb-6">
-          Ask a public question
+          {t("Ask a public question")}
         </h1>
 
         <form onSubmit={handleSubmit}>
           <Card>
             <CardHeader>
               <CardTitle className="text-lg lg:text-xl">
-                Writing a good question
+                {t("Writing a good question")}
               </CardTitle>
             </CardHeader>
 
             <CardContent className="space-y-6">
               <div>
                 <Label htmlFor="title" className="text-base font-semibold">
-                  Title
+                  {t("Title")}
                 </Label>
                 <p className="text-sm text-gray-600 mb-2">
-                  Be specific and imagine you're asking a question to another
-                  person.
+                  {t("Be specific and imagine you're asking a question to another person.")}
                 </p>
                 <Input
                   id="title"
@@ -110,11 +111,10 @@ const index = () => {
 
               <div>
                 <Label htmlFor="body" className="text-base font-semibold">
-                  What are the details of your problem?
+                  {t("What are the details of your problem?")}
                 </Label>
                 <p className="text-sm text-gray-600 mb-2">
-                  Introduce the problem and expand on what you put in the title.
-                  Minimum 20 characters.
+                  {t("Introduce the problem and expand on what you put in the title. Minimum 20 characters.")}
                 </p>
                 <Textarea
                   id="body"
@@ -126,10 +126,10 @@ const index = () => {
               </div>
               <div>
                 <Label htmlFor="tags" className="text-base font-semibold">
-                  Tags
+                  {t("Tags")}
                 </Label>
                 <p className="text-sm text-gray-600 mb-2">
-                  Add up to 5 tags to describe what your question is about.
+                  {t("Tags description")}
                 </p>
                 <div className="flex gap-2">
                   <Input

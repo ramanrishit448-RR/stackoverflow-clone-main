@@ -1,0 +1,10 @@
+Subject: [StackOverflow Clone] Language Change OTP
+
+Hello Test Language User,
+
+Your OTP to change the website language to French is: 376769
+
+This OTP is valid for 10 minutes.
+
+Best regards,
+StackOverflow Clone Team

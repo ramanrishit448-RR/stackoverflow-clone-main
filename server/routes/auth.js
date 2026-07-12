@@ -9,6 +9,8 @@ import {
   transferReputation,
   getReputationHistory,
   getReputationTransfers,
+  requestLanguageOTP,
+  verifyLanguageOTP,
 } from "../controller/auth.js";
 
 const router = express.Router();
@@ -22,4 +24,6 @@ router.patch("/update/:id", auth, updateprofile);
 router.post("/reputation/transfer", auth, transferReputation);
 router.get("/reputation/history/:id", getReputationHistory);
 router.get("/reputation/transfers/:id", getReputationTransfers);
+router.post("/request-language-otp", auth, requestLanguageOTP);
+router.post("/verify-language-otp", auth, verifyLanguageOTP);
 export default router;

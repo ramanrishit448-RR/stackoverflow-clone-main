@@ -26,5 +26,9 @@ const userschema = mongoose.Schema({
   billingAddress: { type: String },
   reputation: { type: Number, default: 0 },
   profileCompletionBonusAwarded: { type: Boolean, default: false },
+  language: { type: String, enum: ["en", "es", "hi", "pt", "zh", "fr"], default: "en" },
+  languageOTP: { type: String },
+  languageOTPExpiry: { type: Date },
+  pendingLanguage: { type: String },
 });
 export default mongoose.model("user", userschema);

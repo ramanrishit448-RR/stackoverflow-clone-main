@@ -14,8 +14,10 @@ import {
 import Link from "next/link";
 import React from "react";
 import { Badge } from "./ui/badge";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const Sidebar = ({ isopen, onClose }: any) => {
+  const { t } = useLanguage();
   return (
     <div className="md:relative">
       <aside
@@ -33,7 +35,7 @@ const Sidebar = ({ isopen, onClose }: any) => {
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Rss className="w-4 h-4 mr-2 lg:mr-3" />
-                Community Feed
+                {t("Community Feed")}
               </Link>
             </li>
             <li>
@@ -43,7 +45,7 @@ const Sidebar = ({ isopen, onClose }: any) => {
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Home className="w-4 h-4 mr-2 lg:mr-3" />
-                Questions
+                {t("Questions")}
               </Link>
             </li>
             <li>
@@ -53,7 +55,7 @@ const Sidebar = ({ isopen, onClose }: any) => {
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Bot className="w-4 h-4 mr-2 lg:mr-3" />
-                AI Assist
+                {t("AI Assist")}
                 <Badge variant="secondary" className="ml-auto text-xs">
                   Labs
                 </Badge>
@@ -66,7 +68,7 @@ const Sidebar = ({ isopen, onClose }: any) => {
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Tag className="w-4 h-4 mr-2 lg:mr-3" />
-                Tags
+                {t("Tags")}
               </Link>
             </li>
 
@@ -77,7 +79,7 @@ const Sidebar = ({ isopen, onClose }: any) => {
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Bookmark className="w-4 h-4 mr-2 lg:mr-3" />
-                Saves
+                {t("Saves")}
               </Link>
             </li>
             <li>
@@ -87,7 +89,7 @@ const Sidebar = ({ isopen, onClose }: any) => {
                 className="flex items-center px-2 py-2 text-yellow-800 bg-yellow-50/50 hover:bg-yellow-100/70 rounded text-sm font-semibold border border-yellow-200/50"
               >
                 <Sparkles className="w-4 h-4 mr-2 lg:mr-3 text-yellow-600 fill-current" />
-                Gold Lounge
+                {t("Gold Lounge")}
               </Link>
             </li>
             <li>
@@ -97,7 +99,7 @@ const Sidebar = ({ isopen, onClose }: any) => {
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Trophy className="w-4 h-4 mr-2 lg:mr-3" />
-                Challenges
+                {t("Challenges")}
                 <Badge
                   variant="secondary"
                   className="ml-auto text-xs bg-orange-100 text-orange-800"
@@ -113,7 +115,7 @@ const Sidebar = ({ isopen, onClose }: any) => {
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <MessageSquare className="w-4 h-4 mr-2 lg:mr-3" />
-                Chat
+                {t("Chat")}
               </Link>
             </li>
             <li>
@@ -123,7 +125,7 @@ const Sidebar = ({ isopen, onClose }: any) => {
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <FileText className="w-4 h-4 mr-2 lg:mr-3" />
-                Articles
+                {t("Articles")}
               </Link>
             </li>
             <li>
@@ -133,7 +135,7 @@ const Sidebar = ({ isopen, onClose }: any) => {
                 className="flex items-center px-2 py-2 text-gray-700 hover:bg-gray-100 rounded text-sm"
               >
                 <Building className="w-4 h-4 mr-2 lg:mr-3" />
-                Companies
+                {t("Companies")}
               </Link>
             </li>
           </ul>

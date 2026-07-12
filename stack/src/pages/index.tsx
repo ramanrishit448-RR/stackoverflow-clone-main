@@ -5,8 +5,10 @@ import axiosInstance from "@/lib/axiosinstance";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function Home() {
+  const { t } = useLanguage();
   const [question, setquestion] = useState<any>(null);
   const [loading, setloading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<any>(null);
@@ -73,7 +75,7 @@ export default function Home() {
   if (!question || question.length === 0) {
     return (
       <Mainlayout>
-        <div className="text-center text-gray-500 mt-4">No question found.</div>
+        <div className="text-center text-gray-500 mt-4">{t("No question found.")}</div>
       </Mainlayout>
     );
   }
@@ -82,54 +84,52 @@ export default function Home() {
     <Mainlayout>
       <main className="min-w-0 p-4 lg:p-6 ">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <h1 className="text-xl lg:text-2xl font-semibold">Top Questions</h1>
+          <h1 className="text-xl lg:text-2xl font-semibold">{t("Top Questions")}</h1>
           <button
             onClick={() => router.push("/ask")}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium whitespace-nowrap"
           >
-            Ask Question
+            {t("Ask Question")}
           </button>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 mb-6">
           <Link
             href="/chat"
-            className="group block rounded-3xl border border-gray-200 bg-white p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition"
+            className="group block rounded-3xl border border-gray-200 bg-white dark:bg-gray-800 p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition"
           >
             <div className="flex items-center justify-between gap-3 mb-4">
               <div>
-                <p className="text-sm text-gray-500">Instant help</p>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Chat with mentors
+                <p className="text-sm text-gray-500">{t("Instant help")}</p>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  {t("Chat with mentors")}
                 </h2>
               </div>
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
                 💬
               </span>
             </div>
-            <p className="text-sm text-gray-600">
-              Jump into a friendly chat space for quick help, code tips, and
-              status updates.
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              {t("Jump into a friendly chat space for quick help, code tips, and status updates.")}
             </p>
           </Link>
           <Link
             href="/challenges"
-            className="group block rounded-3xl border border-gray-200 bg-white p-5 shadow-sm hover:border-orange-300 hover:shadow-md transition"
+            className="group block rounded-3xl border border-gray-200 bg-white dark:bg-gray-800 p-5 shadow-sm hover:border-orange-300 hover:shadow-md transition"
           >
             <div className="flex items-center justify-between gap-3 mb-4">
               <div>
-                <p className="text-sm text-gray-500">Sharpen skills</p>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Explore challenges
+                <p className="text-sm text-gray-500">{t("Sharpen skills")}</p>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  {t("Explore challenges")}
                 </h2>
               </div>
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-orange-50 text-orange-600">
                 🏆
               </span>
             </div>
-            <p className="text-sm text-gray-600">
-              Solve challenges, earn badges, and practice with curated tasks
-              across development topics.
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              {t("Solve challenges, earn badges, and practice with curated tasks across development topics.")}
             </p>
           </Link>
         </div>
@@ -137,17 +137,17 @@ export default function Home() {
         <div className="w-full">
           <div className="flex flex-col sm:flex-row items-start sm:items-center mb-4 text-sm gap-2 sm:gap-4">
             <span className="text-gray-600">
-              {visibleQuestions.length} questions
+              {visibleQuestions.length} {t("questions")}
             </span>
             <div className="flex flex-wrap gap-1 sm:gap-2">
               <button className="px-2 sm:px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs sm:text-sm">
-                Newest
+                {t("Newest")}
               </button>
               <button className="px-2 sm:px-3 py-1 text-gray-600 hover:bg-gray-100 rounded text-xs sm:text-sm">
-                Active
+                {t("Active")}
               </button>
               <button className="px-2 sm:px-3 py-1 text-gray-600 hover:bg-gray-100 rounded flex items-center text-xs sm:text-sm">
-                Bountied
+                {t("Bountied")}
                 <Badge variant="secondary" className="ml-1 text-xs">
                   25
                 </Badge>

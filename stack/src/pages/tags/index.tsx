@@ -4,8 +4,10 @@ import { Search, Tag } from "lucide-react";
 import Mainlayout from "@/layout/Mainlayout";
 import axiosInstance from "@/lib/axiosinstance";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function TagsPage() {
+  const { t } = useLanguage();
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -108,15 +110,13 @@ export default function TagsPage() {
     <Mainlayout>
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Header Block with Premium Aesthetics */}
-        <div className="mb-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm bg-gradient-to-r from-white to-blue-50/20">
-          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+        <div className="mb-8 rounded-3xl border border-gray-200 bg-white dark:bg-gray-800 p-6 shadow-sm bg-gradient-to-r from-white to-blue-50/20 dark:from-gray-800 dark:to-blue-950/10">
+          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight flex items-center gap-2">
             <Tag className="w-6 h-6 text-orange-500" />
-            Tags
+            {t("Tags")}
           </h1>
-          <p className="mt-3 text-gray-600 max-w-2xl text-sm lg:text-base leading-relaxed">
-            A tag is a keyword or label that categorizes your question with other,
-            similar questions. Using the right tags makes it easier for others to
-            find and answer your question.
+          <p className="mt-3 text-gray-600 dark:text-gray-300 max-w-2xl text-sm lg:text-base leading-relaxed">
+            {t("A tag is a keyword or label that categorizes your question with other, similar questions. Using the right tags makes it easier for others to find and answer your question.")}
           </p>
         </div>
 
@@ -127,7 +127,7 @@ export default function TagsPage() {
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filter by tag name"
+              placeholder={t("Filter by tag name")}
               className="pl-10 h-10 rounded-xl"
             />
           </div>

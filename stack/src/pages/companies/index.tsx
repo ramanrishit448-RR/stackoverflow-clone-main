@@ -5,8 +5,10 @@ import { useRouter } from "next/router";
 import { useAuth } from "@/lib/AuthContext";
 import { toast } from "react-toastify";
 import { Building, Search, PlusCircle, MapPin, Briefcase, Globe, Star } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function CompaniesIndex() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -103,8 +105,8 @@ export default function CompaniesIndex() {
         {/* Header Section */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-5">
           <div>
-            <h1 className="text-2xl font-extrabold text-gray-900">Developer Job Board & Company Directory</h1>
-            <p className="text-xs text-gray-500">Explore company tech stacks, culture perks, and open developer roles.</p>
+            <h1 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{t("Companies")}</h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("Learn about what it's like to work at these companies")}</p>
           </div>
           <button
             onClick={handleRegisterClick}

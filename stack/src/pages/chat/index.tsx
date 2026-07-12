@@ -1,26 +1,28 @@
 import Link from "next/link";
 import Mainlayout from "@/layout/Mainlayout";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function ChatPage() {
+  const { t } = useLanguage();
   return (
     <Mainlayout>
       <main className="min-w-0 p-4 lg:p-6">
         <div className="max-w-4xl mx-auto space-y-6">
-          <div className="rounded-3xl border border-blue-200 bg-blue-50 p-6 sm:p-8 shadow-sm">
+          <div className="rounded-3xl border border-blue-200 bg-blue-50 dark:bg-blue-950/20 p-6 sm:p-8 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <p className="text-sm text-blue-700 uppercase tracking-[0.2em]">
+                <p className="text-sm text-blue-700 dark:text-blue-400 uppercase tracking-[0.2em]">
                   Live chat
                 </p>
-                <h1 className="mt-2 text-2xl font-semibold text-slate-900">
-                  Chat with the community
+                <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+                  {t("Chat Room")}
                 </h1>
               </div>
               <div className="flex items-center gap-3">
                 <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-2xl">
                   💬
                 </span>
-                <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                <span className="rounded-full bg-blue-100 dark:bg-blue-900/50 px-3 py-1 text-sm font-medium text-blue-700 dark:text-blue-400">
                   Available now
                 </span>
               </div>

@@ -356,3 +356,135 @@ export const getReputationTransfers = async (req, res) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+export const requestLanguageOTP = async (req, res) => {
+  const { language } = req.body;
+  const userId = req.userid;
+
+  if (!language) {
+    return res.status(400).json({ message: "Language is required" });
+  }
+
+  const supportedLanguages = ["en", "es", "hi", "pt", "zh", "fr"];
+  if (!supportedLanguages.includes(language)) {
+    return res.status(400).json({ message: "Unsupported language" });
+  }
+
+  try {
+    const existingUser = await user.findById(userId);
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (existingUser.language === language) {
+      return res.status(400).json({ message: `Language is already set to ${language}` });
+    }
+
+    // Generate random 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    existingUser.languageOTP = otp;
+    existingUser.languageOTPExpiry = expiry;
+    existingUser.pendingLanguage = language;
+    await existingUser.save();
+
+    let method = "";
+    let recipient = "";
+
+    if (language === "fr") {
+      method = "email";
+      recipient = existingUser.email;
+      await sendEmail({
+        to: recipient,
+        subject: "[StackOverflow Clone] Language Change OTP",
+        text: `Hello ${existingUser.name},\n\nYour OTP to change the website language to French is: ${otp}\n\nThis OTP is valid for 10 minutes.\n\nBest regards,\nStackOverflow Clone Team`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <h2 style="color: #f97316; text-align: center;">Language Change Verification</h2>
+            <p>Hello <strong>${existingUser.name}</strong>,</p>
+            <p>You requested to change the language of your account to French.</p>
+            <p>Please use the following 6-digit One-Time Password (OTP) to complete the change. This OTP is valid for 10 minutes:</p>
+            <div style="background-color: #f1f5f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #1e3a8a; border-radius: 8px; margin: 20px 0;">
+              ${otp}
+            </div>
+            <p style="color: #475569;">If you did not request this change, please ignore this email.</p>
+          </div>
+        `
+      });
+    } else {
+      method = "sms";
+      if (!existingUser.phone) {
+        return res.status(400).json({
+          message: "A registered phone number is required under your profile to switch to this language. Please add one first."
+        });
+      }
+      recipient = existingUser.phone;
+      const langNameMap = {
+        en: "English",
+        es: "Spanish",
+        hi: "Hindi",
+        pt: "Portuguese",
+        zh: "Chinese"
+      };
+      const langName = langNameMap[language] || language;
+      await sendSMS({
+        to: recipient,
+        body: `StackOverflow Clone: Your OTP to change the website language to ${langName} is: ${otp}. Valid for 10 minutes.`
+      });
+    }
+
+    return res.status(200).json({
+      message: `Verification OTP sent to your registered ${method}.`,
+      method,
+      recipient,
+      debugOTP: otp
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Something went wrong." });
+  }
+};
+
+export const verifyLanguageOTP = async (req, res) => {
+  const { otp } = req.body;
+  const userId = req.userid;
+
+  if (!otp) {
+    return res.status(400).json({ message: "OTP is required" });
+  }
+
+  try {
+    const existingUser = await user.findById(userId);
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!existingUser.languageOTP || !existingUser.pendingLanguage) {
+      return res.status(400).json({ message: "No language change request in progress" });
+    }
+
+    if (existingUser.languageOTPExpiry < new Date()) {
+      return res.status(400).json({ message: "OTP has expired" });
+    }
+
+    if (existingUser.languageOTP !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    const newLanguage = existingUser.pendingLanguage;
+    existingUser.language = newLanguage;
+    existingUser.languageOTP = undefined;
+    existingUser.languageOTPExpiry = undefined;
+    existingUser.pendingLanguage = undefined;
+    await existingUser.save();
+
+    return res.status(200).json({
+      message: "Language updated successfully",
+      data: sanitizeUser(existingUser)
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};

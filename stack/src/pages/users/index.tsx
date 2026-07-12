@@ -5,10 +5,12 @@ import axiosInstance from "@/lib/axiosinstance";
 import { Calendar, Search } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 import { Award } from "lucide-react";
 
 const index = () => {
+  const { t } = useLanguage();
   const [users, setusers] = useState<any>(null);
   const [loading, setloading] = useState(true);
   const [filterQuery, setFilterQuery] = useState("");
@@ -60,7 +62,7 @@ const index = () => {
   if (!users || users.length === 0) {
     return (
       <Mainlayout>
-        <div className="text-center text-gray-500 mt-4">No users found.</div>
+        <div className="text-center text-gray-500 mt-4">{t("No users found.")}</div>
       </Mainlayout>
     );
   }
@@ -68,13 +70,13 @@ const index = () => {
   return (
     <Mainlayout>
       <div className="max-w-6xl mx-auto px-4 py-6">
-        <h1 className="text-xl lg:text-2xl font-semibold mb-6">Users</h1>
+        <h1 className="text-xl lg:text-2xl font-semibold mb-6">{t("Users")}</h1>
 
         <div className="mb-6">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Filter by user"
+              placeholder={t("Filter by user name")}
               className="pl-10"
               value={filterQuery}
               onChange={(e) => setFilterQuery(e.target.value)}
