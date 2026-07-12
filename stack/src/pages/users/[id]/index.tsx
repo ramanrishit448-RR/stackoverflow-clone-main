@@ -85,6 +85,42 @@ const index = () => {
   const [userTeams, setUserTeams] = useState<any[]>([]);
   const [loadingUserActivity, setLoadingUserActivity] = useState(false);
 
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+
+  const fetchSessions = async () => {
+    if (!id || id !== user?._id) return;
+    setLoadingSessions(true);
+    try {
+      const res = await axiosInstance.get("/user/sessions");
+      if (res.data.success) {
+        setSessions(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch active sessions:", err);
+    } finally {
+      setLoadingSessions(false);
+    }
+  };
+
+  const handleRevokeSession = async (sessionId: string) => {
+    try {
+      const res = await axiosInstance.delete(`/user/sessions/${sessionId}`);
+      if (res.data.success) {
+        toast.success("Session revoked successfully");
+        fetchSessions();
+      }
+    } catch (err) {
+      toast.error("Failed to revoke session");
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "sessions" && id && user && id === user._id) {
+      fetchSessions();
+    }
+  }, [activeTab, id, user]);
+
   const fetchUserActivity = async () => {
     if (!id) return;
     try {
@@ -703,6 +739,16 @@ const index = () => {
               >
                 <HelpCircle className="w-3.5 h-3.5" />
                 Priority Support
+              </button>
+
+              <button
+                onClick={() => setActiveTab("sessions")}
+                className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                  activeTab === "sessions" ? "border-orange-500 text-orange-600" : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <ShieldAlert className="w-3.5 h-3.5" />
+                Active Sessions
               </button>
             </>
           )}
@@ -1334,6 +1380,84 @@ const index = () => {
                 </CardContent>
               </Card>
             )}
+          </div>
+        )}
+
+        {/* Tab: Active Sessions & Security */}
+        {activeTab === "sessions" && isOwnProfile && (
+          <div className="max-w-4xl mx-auto space-y-6">
+            <Card className="border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <ShieldAlert className="w-5 h-5 text-orange-500" />
+                  Active Sessions & Device Management
+                </CardTitle>
+                <p className="text-xs text-gray-500">
+                  Manage the devices and browsers that are currently logged in to your account. Revoke any session to remotely sign out.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="rounded-xl border border-gray-100 bg-slate-50/50 p-4 text-xs text-gray-600 space-y-1.5">
+                  <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                    <span>💡</span> Security Policy Information
+                  </p>
+                  <p>• Inactive sessions automatically expire after 24 hours of inactivity.</p>
+                  <p>• Whenever a login occurs from an unrecognized device, an email alert is sent to your registered email.</p>
+                </div>
+
+                {loadingSessions ? (
+                  <p className="text-gray-400 text-center py-6">Loading sessions...</p>
+                ) : sessions.length === 0 ? (
+                  <p className="text-gray-400 text-center py-6">No active sessions found.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {sessions.map((s) => (
+                      <div
+                        key={s._id}
+                        className={`rounded-2xl border p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition-all ${
+                          s.isCurrent ? "border-orange-200 bg-orange-50/20 shadow-sm" : "border-gray-150 bg-white hover:border-gray-300"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 text-xl shrink-0">
+                            {s.deviceType === "Mobile" ? "📱" : s.deviceType === "Tablet" ? "📟" : "💻"}
+                          </span>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-semibold text-slate-800 text-sm">
+                                {s.browser} on {s.os}
+                              </span>
+                              {s.isCurrent && (
+                                <Badge className="bg-orange-500 text-white text-[10px] py-0 px-2 font-medium">
+                                  Current Device
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                              IP: <span className="font-mono">{s.ip}</span> • Location: {s.location}
+                            </p>
+                            <p className="text-[11px] text-gray-400 mt-0.5">
+                              First logged in: {new Date(s.createdAt).toLocaleString()} • Last active: {new Date(s.lastActive).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+
+                        {!s.isCurrent && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleRevokeSession(s._id)}
+                            className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-none shrink-0 self-end sm:self-center"
+                          >
+                            Revoke Session
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         )}
 

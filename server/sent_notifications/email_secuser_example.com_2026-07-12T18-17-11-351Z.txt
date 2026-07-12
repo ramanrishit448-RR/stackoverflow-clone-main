@@ -1,0 +1,13 @@
+Subject: [StackOverflow Clone] New Device Login Alert
+
+Hello Security User,
+
+We detected a successful login to your account from a new device:
+
+OS: Windows
+Browser: Chrome
+IP: ::1
+Location: Localhost / Development
+Date/Time: 12/7/2026, 11:47:00 pm
+
+If this was you, you can ignore this email. If this login was unauthorized, please log in to your profile and revoke the session immediately.

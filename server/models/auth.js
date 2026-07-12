@@ -30,5 +30,6 @@ const userschema = mongoose.Schema({
   languageOTP: { type: String },
   languageOTPExpiry: { type: Date },
   pendingLanguage: { type: String },
+  trustedDevices: { type: [String], default: [] },
 });
 export default mongoose.model("user", userschema);

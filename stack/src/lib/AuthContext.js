@@ -47,18 +47,52 @@ export const AuthProvider = ({ children }) => {
     setloading(true);
     seterror(null);
     try {
+      let resolvedDeviceId = localStorage.getItem("deviceId");
+      if (!resolvedDeviceId) {
+        resolvedDeviceId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem("deviceId", resolvedDeviceId);
+      }
       const res = await axiosInstance.post("/user/login", {
         email,
         password,
+        deviceId: resolvedDeviceId,
       });
+
+      if (res.data.status === "pending_otp") {
+        return res.data;
+      }
+
       const { data, token } = res.data;
       localStorage.setItem("user", JSON.stringify({ ...data, token }));
       setUser({ ...data, token });
       toast.success("Login Successful");
-      return true;
+      return { status: "success" };
     } catch (error) {
       const msg =
         error.response?.data?.message || error.response?.data || "Login failed";
+      seterror(msg);
+      toast.error(msg);
+      return false;
+    } finally {
+      setloading(false);
+    }
+  };
+  const verifyDeviceLogin = async (sessionId, otp) => {
+    setloading(true);
+    seterror(null);
+    try {
+      const res = await axiosInstance.post("/user/verify-device-otp", {
+        sessionId,
+        otp,
+      });
+      const { data, token } = res.data;
+      localStorage.setItem("user", JSON.stringify({ ...data, token }));
+      setUser({ ...data, token });
+      toast.success("Device Verified & Logged In");
+      return true;
+    } catch (error) {
+      const msg =
+        error.response?.data?.message || error.response?.data || "Verification failed";
       seterror(msg);
       toast.error(msg);
       return false;
@@ -90,7 +124,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, Signup, Login, Logout, refreshUser, loading, error }}
+      value={{ user, Signup, Login, Logout, verifyDeviceLogin, refreshUser, loading, error }}
     >
       {children}
     </AuthContext.Provider>

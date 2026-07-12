@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken";
 import { sendEmail, sendSMS } from "../utils/delivery.js";
 import ReputationHistory from "../models/reputationHistory.js";
 import { updateReputation } from "../utils/reputation.js";
+import Session from "../models/session.js";
+import LoginActivity from "../models/loginActivity.js";
 
 const sanitizeUser = (doc) => {
   const obj = doc.toObject ? doc.toObject() : doc;
@@ -47,8 +49,49 @@ export const Signup = async (req, res) => {
   }
 };
 
+const parseUserAgent = (uaString) => {
+  if (!uaString) {
+    return { browser: "Unknown", os: "Unknown", deviceType: "Unknown" };
+  }
+  let browser = "Unknown Browser";
+  let os = "Unknown OS";
+  let deviceType = "Desktop";
+
+  if (uaString.includes("Firefox/")) browser = "Firefox";
+  else if (uaString.includes("Edg/")) browser = "Edge";
+  else if (uaString.includes("Chrome/")) browser = "Chrome";
+  else if (uaString.includes("Safari/")) browser = "Safari";
+  else if (uaString.includes("MSIE ") || uaString.includes("Trident/")) browser = "Internet Explorer";
+
+  if (uaString.includes("Windows NT")) os = "Windows";
+  else if (uaString.includes("Macintosh")) os = "macOS";
+  else if (uaString.includes("Android")) os = "Android";
+  else if (uaString.includes("iPhone") || uaString.includes("iPad")) os = "iOS";
+  else if (uaString.includes("Linux")) os = "Linux";
+
+  if (uaString.includes("Mobile") || uaString.includes("Android") || uaString.includes("iPhone")) {
+    deviceType = "Mobile";
+  } else if (uaString.includes("iPad") || uaString.includes("Tablet")) {
+    deviceType = "Tablet";
+  }
+
+  return { browser, os, deviceType };
+};
+
+const getMockLocation = (ip) => {
+  if (ip === "::1" || ip === "127.0.0.1" || ip.startsWith("::ffff:127.0.0.1")) {
+    return "Localhost / Development";
+  }
+  return "New York, USA";
+};
+
 export const Login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, deviceId } = req.body;
+  const ip = req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "127.0.0.1";
+  const userAgentString = req.headers["user-agent"] || "";
+  const { browser, os, deviceType } = parseUserAgent(userAgentString);
+  const location = getMockLocation(ip);
+
   try {
     const exisitinguser = await user.findOne({ email });
     if (!exisitinguser) {
@@ -60,15 +103,117 @@ export const Login = async (req, res) => {
       exisitinguser.password,
     );
     if (!ispasswordcrct) {
+      await LoginActivity.create({
+        userId: exisitinguser._id,
+        email,
+        browser,
+        os,
+        deviceType,
+        ip,
+        location,
+        status: "failed_password",
+      });
       return res.status(400).json({ message: "Invalid password" });
     }
+
+    const resolvedDeviceId = deviceId || "unknown_device_" + Math.random().toString(36).substring(2, 10);
+    const isDeviceTrusted = exisitinguser.trustedDevices.includes(resolvedDeviceId);
+
     const token = jwt.sign(
       { email: exisitinguser.email, id: exisitinguser._id },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" },
+      { expiresIn: "1h" }
     );
-    res.status(200).json({ data: sanitizeUser(exisitinguser), token });
+
+    if (isDeviceTrusted) {
+      await Session.create({
+        userId: exisitinguser._id,
+        token,
+        browser,
+        os,
+        deviceType,
+        ip,
+        location,
+        deviceId: resolvedDeviceId,
+        isTrusted: true,
+        isVerified: true,
+      });
+
+      await LoginActivity.create({
+        userId: exisitinguser._id,
+        email,
+        browser,
+        os,
+        deviceType,
+        ip,
+        location,
+        status: "success",
+      });
+
+      return res.status(200).json({ status: "success", data: sanitizeUser(exisitinguser), token });
+    } else {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+      const tempSession = await Session.create({
+        userId: exisitinguser._id,
+        token,
+        browser,
+        os,
+        deviceType,
+        ip,
+        location,
+        deviceId: resolvedDeviceId,
+        isTrusted: false,
+        isVerified: false,
+        verificationOTP: otp,
+        verificationOTPExpiry: expiry,
+      });
+
+      await sendEmail({
+        to: exisitinguser.email,
+        subject: "[StackOverflow Clone] Unrecognized Device Login OTP",
+        text: `Hello ${exisitinguser.name},\n\nWe detected a login attempt from an unrecognized device:\n\nOS: ${os}\nBrowser: ${browser}\nIP: ${ip}\nLocation: ${location}\n\nYour 6-digit OTP verification code is: ${otp}\n\nIf you did not request this, please change your password immediately.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <h2 style="color: #ea580c; text-align: center;">Unrecognized Device Detected</h2>
+            <p>Hello <strong>${exisitinguser.name}</strong>,</p>
+            <p>We detected a login attempt from a new or unrecognized device with details:</p>
+            <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+              <tr><td style="padding: 6px 0; font-weight: bold; color: #475569;">Browser:</td><td style="color: #1e293b;">${browser}</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold; color: #475569;">OS:</td><td style="color: #1e293b;">${os}</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold; color: #475569;">IP:</td><td style="color: #1e293b;">${ip}</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold; color: #475569;">Location:</td><td style="color: #1e293b;">${location}</td></tr>
+            </table>
+            <p>Please enter this 6-digit verification code to log in and mark this device as trusted. This code is valid for 10 minutes:</p>
+            <div style="background-color: #f1f5f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #1e3a8a; border-radius: 8px; margin: 20px 0;">
+              ${otp}
+            </div>
+            <p style="color: #ef4444; font-size: 13px;">If this login attempt wasn't you, please change your password immediately.</p>
+          </div>
+        `
+      });
+
+      await LoginActivity.create({
+        userId: exisitinguser._id,
+        email,
+        browser,
+        os,
+        deviceType,
+        ip,
+        location,
+        status: "pending_otp",
+      });
+
+      return res.status(200).json({
+        status: "pending_otp",
+        sessionId: tempSession._id,
+        message: "Login from unrecognized device. Verification required.",
+        debugOTP: otp
+      });
+    }
   } catch (error) {
+    console.error(error);
     res.status(500).json("something went wrong..");
     return;
   }
@@ -483,6 +628,162 @@ export const verifyLanguageOTP = async (req, res) => {
       message: "Language updated successfully",
       data: sanitizeUser(existingUser)
     });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const verifyDeviceOTP = async (req, res) => {
+  const { sessionId, otp } = req.body;
+
+  if (!sessionId || !otp) {
+    return res.status(400).json({ message: "Session ID and OTP are required" });
+  }
+
+  try {
+    const session = await Session.findById(sessionId);
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    if (session.isVerified) {
+      return res.status(400).json({ message: "Session is already verified" });
+    }
+
+    if (session.verificationOTPExpiry < new Date()) {
+      await LoginActivity.create({
+        userId: session.userId,
+        email: "unknown",
+        browser: session.browser,
+        os: session.os,
+        deviceType: session.deviceType,
+        ip: session.ip,
+        location: session.location,
+        status: "otp_failed",
+      });
+      return res.status(400).json({ message: "OTP has expired" });
+    }
+
+    if (session.verificationOTP !== otp) {
+      await LoginActivity.create({
+        userId: session.userId,
+        email: "unknown",
+        browser: session.browser,
+        os: session.os,
+        deviceType: session.deviceType,
+        ip: session.ip,
+        location: session.location,
+        status: "otp_failed",
+      });
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    session.isVerified = true;
+    session.verificationOTP = undefined;
+    session.verificationOTPExpiry = undefined;
+    await session.save();
+
+    const matchedUser = await user.findById(session.userId);
+    if (matchedUser) {
+      if (!matchedUser.trustedDevices.includes(session.deviceId)) {
+        matchedUser.trustedDevices.push(session.deviceId);
+        await matchedUser.save();
+      }
+
+      await LoginActivity.create({
+        userId: matchedUser._id,
+        email: matchedUser.email,
+        browser: session.browser,
+        os: session.os,
+        deviceType: session.deviceType,
+        ip: session.ip,
+        location: session.location,
+        status: "success",
+      });
+
+      await sendEmail({
+        to: matchedUser.email,
+        subject: "[StackOverflow Clone] New Device Login Alert",
+        text: `Hello ${matchedUser.name},\n\nWe detected a successful login to your account from a new device:\n\nOS: ${session.os}\nBrowser: ${session.browser}\nIP: ${session.ip}\nLocation: ${session.location}\nDate/Time: ${session.createdAt.toLocaleString()}\n\nIf this was you, you can ignore this email. If this login was unauthorized, please log in to your profile and revoke the session immediately.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <h2 style="color: #ea580c; text-align: center;">New Device Login Alert</h2>
+            <p>Hello <strong>${matchedUser.name}</strong>,</p>
+            <p>We detected a successful login to your account from a new or unrecognized device:</p>
+            <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+              <tr><td style="padding: 6px 0; font-weight: bold; color: #475569;">Browser:</td><td style="color: #1e293b;">${session.browser}</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold; color: #475569;">OS:</td><td style="color: #1e293b;">${session.os}</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold; color: #475569;">IP:</td><td style="color: #1e293b;">${session.ip}</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold; color: #475569;">Location:</td><td style="color: #1e293b;">${session.location}</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: bold; color: #475569;">Date/Time:</td><td style="color: #1e293b;">${session.createdAt.toLocaleString()}</td></tr>
+            </table>
+            <p style="color: #475569;">If this was you, no action is needed. If you do not recognize this login, please immediately log in, navigate to your profile and revoke this session, and update your password.</p>
+          </div>
+        `
+      });
+
+      return res.status(200).json({
+        status: "success",
+        token: session.token,
+        data: sanitizeUser(matchedUser)
+      });
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const getActiveSessions = async (req, res) => {
+  const userId = req.userid;
+  const authHeader = req.headers.authorization;
+  const currentToken = authHeader?.split(" ")[1];
+
+  try {
+    const sessions = await Session.find({ userId, isVerified: true }).sort({ lastActive: -1 });
+    const formattedSessions = sessions.map((s) => {
+      const obj = s.toObject();
+      obj.isCurrent = s.token === currentToken;
+      delete obj.token;
+      delete obj.verificationOTP;
+      return obj;
+    });
+    return res.status(200).json({ success: true, data: formattedSessions });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const revokeSession = async (req, res) => {
+  const userId = req.userid;
+  const { id } = req.params;
+
+  try {
+    const session = await Session.findOne({ _id: id, userId });
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    const matchedUser = await user.findById(userId);
+
+    await LoginActivity.create({
+      userId,
+      email: matchedUser?.email || "unknown",
+      browser: session.browser,
+      os: session.os,
+      deviceType: session.deviceType,
+      ip: session.ip,
+      location: session.location,
+      status: "revoked",
+    });
+
+    await session.deleteOne();
+
+    return res.status(200).json({ success: true, message: "Session revoked successfully" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Something went wrong" });

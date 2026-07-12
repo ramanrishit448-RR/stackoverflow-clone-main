@@ -11,6 +11,9 @@ import {
   getReputationTransfers,
   requestLanguageOTP,
   verifyLanguageOTP,
+  verifyDeviceOTP,
+  getActiveSessions,
+  revokeSession,
 } from "../controller/auth.js";
 
 const router = express.Router();
@@ -26,4 +29,7 @@ router.get("/reputation/history/:id", getReputationHistory);
 router.get("/reputation/transfers/:id", getReputationTransfers);
 router.post("/request-language-otp", auth, requestLanguageOTP);
 router.post("/verify-language-otp", auth, verifyLanguageOTP);
+router.post("/verify-device-otp", verifyDeviceOTP);
+router.get("/sessions", auth, getActiveSessions);
+router.delete("/sessions/:id", auth, revokeSession);
 export default router;

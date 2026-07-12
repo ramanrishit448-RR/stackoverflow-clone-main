@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Post from "../models/post.js";
 import Report from "../models/report.js";
 import User from "../models/auth.js";
+import LoginActivity from "../models/loginActivity.js";
 
 export const getReports = async (req, res) => {
   try {
@@ -129,5 +130,17 @@ export const promoteAdmin = async (req, res) => {
     res.status(200).json({ data: user, message: "User promoted to admin" });
   } catch (error) {
     res.status(500).json({ message: "Failed to promote user" });
+  }
+};
+
+export const getLoginActivityLogs = async (req, res) => {
+  try {
+    const logs = await LoginActivity.find()
+      .populate("userId", "name email")
+      .sort({ timestamp: -1 })
+      .lean();
+    res.status(200).json({ success: true, data: logs });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to load login activity logs" });
   }
 };
