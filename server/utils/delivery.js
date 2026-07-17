@@ -76,8 +76,9 @@ export const sendSMS = async ({ to, body }) => {
 
   if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_FROM_NUMBER) {
     try {
-      // Dynamically load twilio package to prevent errors if not installed
-      const twilio = (await import("twilio")).default;
+      const twilioPkg = "twilio";
+      const twilioModule = await import(/* webpackIgnore: true */ twilioPkg);
+      const twilio = twilioModule.default || twilioModule;
       const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
       const message = await client.messages.create({
