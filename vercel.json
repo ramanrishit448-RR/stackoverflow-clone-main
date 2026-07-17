@@ -1,6 +1,6 @@
 {
   "version": 2,
   "installCommand": "cd stack && npm install && cd ../server && npm install",
-  "buildCommand": "cd stack && npx next build --no-turbopack",
+  "buildCommand": "cd stack && npm run build",
   "outputDirectory": "stack/.next"
 }
