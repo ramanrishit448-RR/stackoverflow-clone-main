@@ -1,30 +1,33 @@
 import type { NextConfig } from "next";
 
+// All packages that live in server/node_modules and must NOT be bundled by webpack
+const SERVER_ONLY_PACKAGES = [
+  "bcryptjs",
+  "mongoose",
+  "mongodb",
+  "express",
+  "jsonwebtoken",
+  "nodemailer",
+  "pdfkit",
+  "razorpay",
+  "cors",
+  "dotenv",
+  "twilio",
+  "aws4",
+  "kerberos",
+  "snappy",
+  "@mongodb-js/zstd",
+  "@aws-sdk/credential-providers",
+  "mongodb-client-encryption",
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   env: {
     BACKEND_URL: process.env.BACKEND_URL || "",
   },
-  // Tell Next.js NOT to bundle these server-only packages via webpack.
-  // They will be required at runtime in the Node.js serverless environment.
-  serverExternalPackages: [
-    "bcryptjs",
-    "mongoose",
-    "mongodb",
-    "express",
-    "jsonwebtoken",
-    "nodemailer",
-    "pdfkit",
-    "razorpay",
-    "cors",
-    "twilio",
-    "aws4",
-    "kerberos",
-    "snappy",
-    "@mongodb-js/zstd",
-    "@aws-sdk/credential-providers",
-    "mongodb-client-encryption",
-  ],
+  // Next.js 15: skip bundling these packages, require() them at runtime
+  serverExternalPackages: SERVER_ONLY_PACKAGES,
   async rewrites() {
     return [
       { source: "/user/:path*", destination: "/api/user/:path*" },
@@ -40,6 +43,22 @@ const nextConfig: NextConfig = {
       { source: "/collectives/:path*", destination: "/api/collectives/:path*" },
       { source: "/companies/:path*", destination: "/api/companies/:path*" },
     ];
+  },
+  webpack(config, { isServer }) {
+    if (isServer) {
+      // webpack externals: emit `require('pkg')` instead of bundling or resolving
+      config.externals = [
+        ...(Array.isArray(config.externals) ? config.externals : [config.externals].filter(Boolean)),
+        ({ request }: { request: string }, callback: Function) => {
+          const pkg = request?.split("/")[0];
+          if (pkg && SERVER_ONLY_PACKAGES.includes(pkg)) {
+            return callback(null, `commonjs ${request}`);
+          }
+          callback();
+        },
+      ];
+    }
+    return config;
   },
 };
 
