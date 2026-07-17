@@ -1,11 +1,30 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   env: {
     BACKEND_URL: process.env.BACKEND_URL || "",
   },
+  // Tell Next.js NOT to bundle these server-only packages via webpack.
+  // They will be required at runtime in the Node.js serverless environment.
+  serverExternalPackages: [
+    "bcryptjs",
+    "mongoose",
+    "mongodb",
+    "express",
+    "jsonwebtoken",
+    "nodemailer",
+    "pdfkit",
+    "razorpay",
+    "cors",
+    "twilio",
+    "aws4",
+    "kerberos",
+    "snappy",
+    "@mongodb-js/zstd",
+    "@aws-sdk/credential-providers",
+    "mongodb-client-encryption",
+  ],
   async rewrites() {
     return [
       { source: "/user/:path*", destination: "/api/user/:path*" },
@@ -22,29 +41,7 @@ const nextConfig: NextConfig = {
       { source: "/companies/:path*", destination: "/api/companies/:path*" },
     ];
   },
-  webpack(config, { isServer }) {
-    if (isServer) {
-      // Tell webpack to not bundle these native/optional packages —
-      // they'll be available at runtime in the serverless environment
-      config.externals = [
-        ...(Array.isArray(config.externals) ? config.externals : []),
-        "twilio",
-        "pdfkit",
-        "aws4",
-        "kerberos",
-        "snappy",
-        "@mongodb-js/zstd",
-        "@aws-sdk/credential-providers",
-        "mongodb-client-encryption",
-      ];
-    }
-    // Resolve server-side node_modules from the stack folder
-    config.resolve.modules = [
-      path.resolve(__dirname, "node_modules"),
-      "node_modules",
-    ];
-    return config;
-  },
 };
 
 export default nextConfig;
+
