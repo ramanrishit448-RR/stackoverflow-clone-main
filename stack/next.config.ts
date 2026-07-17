@@ -23,6 +23,7 @@ const SERVER_ONLY_PACKAGES = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  turbopack: {},
   // Next.js 15: skip bundling these packages, require() them at runtime
   serverExternalPackages: SERVER_ONLY_PACKAGES,
   async rewrites() {
