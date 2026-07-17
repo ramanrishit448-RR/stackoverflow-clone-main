@@ -20,7 +20,22 @@ dotenv.config();
 
 app.use(express.json({ limit: "30mb", extended: true }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
-app.use(cors());
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    // Allow localhost and any vercel.app subdomain
+    if (
+      origin.includes("localhost") ||
+      origin.includes("vercel.app") ||
+      origin.includes("127.0.0.1")
+    ) {
+      return callback(null, true);
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+}));
 
 // Middleware to ensure Database connection on serverless requests
 let isConnected = false;
