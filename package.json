@@ -1,0 +1,7 @@
+{
+  "name": "stackoverflow-clone",
+  "version": "1.0.0",
+  "dependencies": {
+    "next": "15.4.1"
+  }
+}
