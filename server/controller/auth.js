@@ -41,7 +41,7 @@ export const Signup = async (req, res) => {
     });
     const token = jwt.sign(
       { email: newuser.email, id: newuser._id },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || "stackoverflow_clone_dev_secret",
       { expiresIn: "1h" },
     );
 
@@ -143,7 +143,7 @@ export const Login = async (req, res) => {
 
     const token = jwt.sign(
       { email: exisitinguser.email, id: exisitinguser._id },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || "stackoverflow_clone_dev_secret",
       { expiresIn: "1h" }
     );
 

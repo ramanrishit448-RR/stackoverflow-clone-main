@@ -8,7 +8,7 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ message: "Authentication required" });
     }
     const token = header.split(" ")[1];
-    const decodedata = jwt.verify(token, process.env.JWT_SECRET);
+    const decodedata = jwt.verify(token, process.env.JWT_SECRET || "stackoverflow_clone_dev_secret");
     req.userid = decodedata?.id;
 
     const session = await Session.findOne({ token, userId: req.userid });
@@ -40,7 +40,7 @@ export const optionalAuth = async (req, res, next) => {
     const header = req.headers.authorization;
     if (header?.startsWith("Bearer ")) {
       const token = header.split(" ")[1];
-      const decodedata = jwt.verify(token, process.env.JWT_SECRET);
+      const decodedata = jwt.verify(token, process.env.JWT_SECRET || "stackoverflow_clone_dev_secret");
       
       const session = await Session.findOne({ token, userId: decodedata?.id });
       if (session && session.isVerified) {
@@ -65,7 +65,7 @@ export const adminAuth = async (req, res, next) => {
       return res.status(401).json({ message: "Authentication required" });
     }
     const token = header.split(" ")[1];
-    const decodedata = jwt.verify(token, process.env.JWT_SECRET);
+    const decodedata = jwt.verify(token, process.env.JWT_SECRET || "stackoverflow_clone_dev_secret");
     req.userid = decodedata?.id;
 
     const session = await Session.findOne({ token, userId: req.userid });
