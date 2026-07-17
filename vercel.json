@@ -1,6 +1,6 @@
 {
   "version": 2,
   "installCommand": "cd stack && npm install && cd ../server && npm install",
-  "buildCommand": "cd stack && npm run build",
+  "buildCommand": "cp -r server stack/server || true && cd stack && npm run build",
   "outputDirectory": "stack/.next"
 }
