@@ -11,7 +11,10 @@ export const config = {
 
 let app: any;
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (!app) {
     const modulePath = path.resolve(process.cwd(), "..", "server", "index.js");
     const loaded = await import(pathToFileURL(modulePath).href);
