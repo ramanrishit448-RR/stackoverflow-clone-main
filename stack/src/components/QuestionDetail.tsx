@@ -37,8 +37,14 @@ const QuestionDetail = ({ questionId }: any) => {
         const matchedquestion = res.data.data.find(
           (u: any) => u._id === questionId
         );
-        setanswer(matchedquestion.answer);
-        setquestion(matchedquestion);
+        if (matchedquestion) {
+          const bookmarkedIds = JSON.parse(localStorage.getItem("bookmarked_questions") || "[]");
+          matchedquestion.isBookmarked = bookmarkedIds.includes(matchedquestion._id);
+          setanswer(matchedquestion.answer);
+          setquestion(matchedquestion);
+        } else {
+          setquestion(null);
+        }
       } catch (error) {
         console.log(error);
       } finally {
@@ -79,7 +85,21 @@ const QuestionDetail = ({ questionId }: any) => {
     }
   };
   const handlebookmark = () => {
-    setquestion((prev: any) => ({ ...prev, isBookmarked: !prev.isBookmarked }));
+    if (!question) return;
+    const bookmarkedIds = JSON.parse(localStorage.getItem("bookmarked_questions") || "[]");
+    let isBookmarked = false;
+    let newIds = [];
+    if (bookmarkedIds.includes(question._id)) {
+      newIds = bookmarkedIds.filter((id: string) => id !== question._id);
+      isBookmarked = false;
+      toast.info("Question removed from saves");
+    } else {
+      newIds = [...bookmarkedIds, question._id];
+      isBookmarked = true;
+      toast.success("Question saved successfully");
+    }
+    localStorage.setItem("bookmarked_questions", JSON.stringify(newIds));
+    setquestion((prev: any) => ({ ...prev, isBookmarked }));
   };
   const handleSubmitanswer = async () => {
     if(!user){
@@ -93,24 +113,15 @@ const QuestionDetail = ({ questionId }: any) => {
       const res = await axiosInstance.post(
         `/answer/postanswer/${question?._id}`,
         {
-          noofanswer: question.noofanswer,
+          noofanswer: question.noofanswer + 1,
           answerbody: newanswer,
           useranswered: user.name,
           userid: user._id,
         }
       );
       if (res.data.data) {
-        const newObj = {
-          answerbody: newanswer,
-          useranswered: user.name,
-          userid: user._id,
-          answeredon: new Date().toISOString(),
-        };
-        setquestion((prev: any) => ({
-          ...prev,
-          noofanswer: prev.noofanswer + 1,
-          answer: [...(prev.answer || []), newObj],
-        }));
+        setquestion(res.data.data);
+        setanswer(res.data.data.answer);
         toast.success("Answer Uploaded");
       }
     } catch (error) {
@@ -528,7 +539,7 @@ const QuestionDetail = ({ questionId }: any) => {
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-gray-600">
-                          answerd {ans.answeredon}
+                          answered {new Date(ans.answeredon).toLocaleDateString()}
                         </span>
                         <Link
                           href={`/users/${ans.userid}`}

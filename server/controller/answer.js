@@ -14,7 +14,7 @@ export const Askanswer = async (req, res) => {
   try {
     const updatequestion = await question.findByIdAndUpdate(_id, {
       $addToSet: { answer: [{ answerbody, useranswered, userid }] },
-    });
+    }, { new: true });
 
     // Award +5 reputation points for posting an answer
     if (userid) {
@@ -108,6 +108,10 @@ export const voteAnswer = async (req, res) => {
 
     const ans = questionDoc.answer.id(answerId);
     if (!ans) return res.status(404).json({ message: "Answer not found" });
+
+    if (ans.userid === String(userid)) {
+      return res.status(400).json({ message: "You cannot vote on your own answer" });
+    }
 
     if (!ans.upvote) ans.upvote = [];
     if (!ans.downvote) ans.downvote = [];

@@ -135,6 +135,10 @@ export const votequestion = async (req, res) => {
     const questionDoc = await question.findById(_id);
     if (!questionDoc) return res.status(404).json({ message: "Question not found" });
 
+    if (questionDoc.userid === String(userid)) {
+      return res.status(400).json({ message: "You cannot vote on your own question" });
+    }
+
     const upindex = questionDoc.upvote.findIndex((id) => id === String(userid));
     const downindex = questionDoc.downvote.findIndex((id) => id === String(userid));
 

@@ -39,6 +39,7 @@ const index = () => {
     tags: [] as string[],
     emailNotifications: true,
     smsNotifications: false,
+    phone: "",
   });
   const [newTag, setNewTag] = useState("");
   const [following, setFollowing] = useState(false);
@@ -280,6 +281,7 @@ const index = () => {
           tags: editForm.tags,
           emailNotifications: editForm.emailNotifications,
           smsNotifications: editForm.smsNotifications,
+          phone: editForm.phone,
         };
 
         setusers(updatedUser);
@@ -572,6 +574,7 @@ const index = () => {
                           tags: users?.tags || [],
                           emailNotifications: users?.emailNotifications ?? true,
                           smsNotifications: users?.smsNotifications ?? false,
+                          phone: users?.phone || "",
                         });
                       }
                       setIsEditing(open);
@@ -602,6 +605,19 @@ const index = () => {
                                 setEditForm({
                                   ...editForm,
                                   name: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="phone">Phone Number</Label>
+                            <Input
+                              id="phone"
+                              value={editForm.phone}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  phone: e.target.value,
                                 })
                               }
                             />
