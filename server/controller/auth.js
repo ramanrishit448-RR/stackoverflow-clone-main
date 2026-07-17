@@ -24,26 +24,48 @@ const generateRandomPassword = () => {
 };
 
 export const Signup = async (req, res) => {
-  const { name, email, password, phone } = req.body;
+  const { name, email, password, phone, deviceId } = req.body;
   try {
     const exisitinguser = await user.findOne({ email });
     if (exisitinguser) {
       return res.status(404).json({ message: "User already exist" });
     }
+    const resolvedDeviceId = deviceId || "unknown_device_" + Math.random().toString(36).substring(2, 10);
     const hashpassword = await bcrypt.hash(password, 12);
     const newuser = await user.create({
       name,
       email,
       phone,
       password: hashpassword,
+      trustedDevices: [resolvedDeviceId],
     });
     const token = jwt.sign(
       { email: newuser.email, id: newuser._id },
       process.env.JWT_SECRET,
       { expiresIn: "1h" },
     );
+
+    const ip = req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "127.0.0.1";
+    const userAgentString = req.headers["user-agent"] || "";
+    const { browser, os, deviceType } = parseUserAgent(userAgentString);
+    const location = getMockLocation(ip);
+
+    await Session.create({
+      userId: newuser._id,
+      token,
+      browser,
+      os,
+      deviceType,
+      ip,
+      location,
+      deviceId: resolvedDeviceId,
+      isTrusted: true,
+      isVerified: true,
+    });
+
     res.status(200).json({ data: sanitizeUser(newuser), token });
   } catch (error) {
+    console.error("Signup error:", error);
     res.status(500).json("something went wrong..");
     return;
   }

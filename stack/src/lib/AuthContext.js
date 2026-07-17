@@ -20,11 +20,17 @@ export const AuthProvider = ({ children }) => {
     setloading(true);
     seterror(null);
     try {
+      let resolvedDeviceId = localStorage.getItem("deviceId");
+      if (!resolvedDeviceId) {
+        resolvedDeviceId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem("deviceId", resolvedDeviceId);
+      }
       const res = await axiosInstance.post("/user/signup", {
         name,
         email,
         phone,
         password,
+        deviceId: resolvedDeviceId,
       });
       const { data, token } = res.data;
       localStorage.setItem("user", JSON.stringify({ ...data, token }));
