@@ -38,12 +38,17 @@ export const AuthProvider = ({ children }) => {
       toast.success("Signup Successful");
       return true;
     } catch (error) {
-      const msg =
-        error.response?.data?.message ||
-        error.response?.data ||
-        "Signup failed";
-      seterror(msg);
-      toast.error(msg);
+      console.error(error);
+      let errorDetail = "Signup failed";
+      if (error.response) {
+        errorDetail = error.response.data?.message || (typeof error.response.data === "string" ? error.response.data : JSON.stringify(error.response.data)) || `Server Error (${error.response.status})`;
+      } else if (error.request) {
+        errorDetail = "No response from server. Check your backend URL / CORS settings.";
+      } else {
+        errorDetail = error.message;
+      }
+      seterror(errorDetail);
+      toast.error(errorDetail);
       return false;
     } finally {
       setloading(false);
@@ -74,10 +79,17 @@ export const AuthProvider = ({ children }) => {
       toast.success("Login Successful");
       return { status: "success" };
     } catch (error) {
-      const msg =
-        error.response?.data?.message || error.response?.data || "Login failed";
-      seterror(msg);
-      toast.error(msg);
+      console.error(error);
+      let errorDetail = "Login failed";
+      if (error.response) {
+        errorDetail = error.response.data?.message || (typeof error.response.data === "string" ? error.response.data : JSON.stringify(error.response.data)) || `Server Error (${error.response.status})`;
+      } else if (error.request) {
+        errorDetail = "No response from server. Check your backend URL / CORS settings.";
+      } else {
+        errorDetail = error.message;
+      }
+      seterror(errorDetail);
+      toast.error(errorDetail);
       return false;
     } finally {
       setloading(false);
