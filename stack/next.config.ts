@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -20,6 +21,29 @@ const nextConfig: NextConfig = {
       { source: "/collectives/:path*", destination: "/api/collectives/:path*" },
       { source: "/companies/:path*", destination: "/api/companies/:path*" },
     ];
+  },
+  webpack(config, { isServer }) {
+    if (isServer) {
+      // Tell webpack to not bundle these native/optional packages —
+      // they'll be available at runtime in the serverless environment
+      config.externals = [
+        ...(Array.isArray(config.externals) ? config.externals : []),
+        "twilio",
+        "pdfkit",
+        "aws4",
+        "kerberos",
+        "snappy",
+        "@mongodb-js/zstd",
+        "@aws-sdk/credential-providers",
+        "mongodb-client-encryption",
+      ];
+    }
+    // Resolve server-side node_modules from the stack folder
+    config.resolve.modules = [
+      path.resolve(__dirname, "node_modules"),
+      "node_modules",
+    ];
+    return config;
   },
 };
 
