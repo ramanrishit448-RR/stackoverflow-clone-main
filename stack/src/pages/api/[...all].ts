@@ -16,9 +16,30 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   if (!app) {
-    const modulePath = path.resolve(process.cwd(), "..", "server", "index.js");
-    const loaded = await import(pathToFileURL(modulePath).href);
-    app = loaded.default;
+    const candidates = [
+      path.resolve(process.cwd(), "..", "server", "index.js"), // when cwd is stack
+      path.resolve(process.cwd(), "server", "index.js"), // when server copied into stack
+      path.resolve(process.cwd(), "..", "..", "server", "index.js"), // extra fallback
+    ];
+
+    let loaded: any = null;
+    for (const p of candidates) {
+      try {
+        loaded = await import(pathToFileURL(p).href);
+        if (loaded) {
+          app = loaded.default;
+          break;
+        }
+      } catch (err) {
+        // ignore and try next
+      }
+    }
+    if (!app) {
+      throw new Error(
+        "Server entry not found in any expected location: " +
+          candidates.join(", "),
+      );
+    }
   }
 
   if (req.url?.startsWith("/api")) {
