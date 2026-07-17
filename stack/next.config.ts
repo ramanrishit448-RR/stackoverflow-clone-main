@@ -9,7 +9,6 @@ const SERVER_ONLY_PACKAGES = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  turbopack: {},
   serverExternalPackages: SERVER_ONLY_PACKAGES,
   async rewrites() {
     return [
