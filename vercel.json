@@ -1,0 +1,67 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "stack/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "server/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/user/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/question/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/answer/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/feed/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/follow/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/notifications/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/payment/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/articles/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/teams/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/collectives/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/companies/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/stack/$1"
+    }
+  ]
+}
