@@ -559,21 +559,46 @@ export const requestLanguageOTP = async (req, res) => {
     existingUser.pendingLanguage = language;
     await existingUser.save();
 
-    let method = "";
+    let method = "sms";
     let recipient = "";
 
-    if (language === "fr") {
+    if (existingUser.phone) {
+      method = "sms";
+      recipient = existingUser.phone;
+      const langNameMap = {
+        en: "English",
+        es: "Spanish",
+        hi: "Hindi",
+        pt: "Portuguese",
+        zh: "Chinese",
+        fr: "French"
+      };
+      const langName = langNameMap[language] || language;
+      await sendSMS({
+        to: recipient,
+        body: `StackOverflow Clone: Your OTP to change the website language to ${langName} is: ${otp}. Valid for 10 minutes.`
+      });
+    } else {
       method = "email";
       recipient = existingUser.email;
+      const langNameMap = {
+        en: "English",
+        es: "Spanish",
+        hi: "Hindi",
+        pt: "Portuguese",
+        zh: "Chinese",
+        fr: "French"
+      };
+      const langName = langNameMap[language] || language;
       await sendEmail({
         to: recipient,
         subject: "[StackOverflow Clone] Language Change OTP",
-        text: `Hello ${existingUser.name},\n\nYour OTP to change the website language to French is: ${otp}\n\nThis OTP is valid for 10 minutes.\n\nBest regards,\nStackOverflow Clone Team`,
+        text: `Hello ${existingUser.name},\n\nYour OTP to change the website language to ${langName} is: ${otp}\n\nThis OTP is valid for 10 minutes.\n\nBest regards,\nStackOverflow Clone Team`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
             <h2 style="color: #f97316; text-align: center;">Language Change Verification</h2>
             <p>Hello <strong>${existingUser.name}</strong>,</p>
-            <p>You requested to change the language of your account to French.</p>
+            <p>You requested to change the language of your account to ${langName}.</p>
             <p>Please use the following 6-digit One-Time Password (OTP) to complete the change. This OTP is valid for 10 minutes:</p>
             <div style="background-color: #f1f5f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #1e3a8a; border-radius: 8px; margin: 20px 0;">
               ${otp}
@@ -581,26 +606,6 @@ export const requestLanguageOTP = async (req, res) => {
             <p style="color: #475569;">If you did not request this change, please ignore this email.</p>
           </div>
         `
-      });
-    } else {
-      method = "sms";
-      if (!existingUser.phone) {
-        return res.status(400).json({
-          message: "A registered phone number is required under your profile to switch to this language. Please add one first."
-        });
-      }
-      recipient = existingUser.phone;
-      const langNameMap = {
-        en: "English",
-        es: "Spanish",
-        hi: "Hindi",
-        pt: "Portuguese",
-        zh: "Chinese"
-      };
-      const langName = langNameMap[language] || language;
-      await sendSMS({
-        to: recipient,
-        body: `StackOverflow Clone: Your OTP to change the website language to ${langName} is: ${otp}. Valid for 10 minutes.`
       });
     }
 

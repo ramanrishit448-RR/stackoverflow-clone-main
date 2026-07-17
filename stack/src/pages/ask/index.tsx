@@ -58,9 +58,10 @@ const index = () => {
         toast.success("Question posted successfully");
         router.push("/");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
-      toast.error("Something went wrong");
+      const msg = error.response?.data?.message || "Something went wrong";
+      toast.error(msg);
     }
   };
   const handleAddTag = (e: any) => {
