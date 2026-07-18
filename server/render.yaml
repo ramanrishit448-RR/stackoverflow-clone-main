@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: stackoverflow-clone-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URL
+        fromDatabase:
+          name: mongodb
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOW_ALL_CORS
+        value: "true"
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM_NUMBER
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+
+databases:
+  - name: mongodb
+    databaseName: stackoverflow
+    plan: free
