@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const configuredBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.trim() || process.env.BACKEND_URL?.trim() || "";
+
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || "",
+  baseURL: configuredBaseUrl || (typeof window !== "undefined" ? window.location.origin : ""),
   headers: {
     "Content-Type": "application/json",
   },
