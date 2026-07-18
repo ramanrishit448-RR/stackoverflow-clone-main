@@ -1,9 +1,14 @@
 import axios from "axios";
 
-const configuredBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.trim() || process.env.BACKEND_URL?.trim() || "";
+const configuredBaseUrl =
+  process.env.NEXT_PUBLIC_BACKEND_URL?.trim() ||
+  process.env.BACKEND_URL?.trim() ||
+  "";
 
 const axiosInstance = axios.create({
-  baseURL: configuredBaseUrl || (typeof window !== "undefined" ? window.location.origin : ""),
+  baseURL:
+    configuredBaseUrl ||
+    (typeof window !== "undefined" ? window.location.origin : ""),
   headers: {
     "Content-Type": "application/json",
   },
@@ -27,7 +32,7 @@ axiosInstance.interceptors.response.use(
     if (typeof window !== "undefined" && error.response?.status === 401) {
       const msg = error.response?.data?.message || "";
       if (
-        msg.toLowerCase().includes("token") || 
+        msg.toLowerCase().includes("token") ||
         msg.toLowerCase().includes("authentication required")
       ) {
         localStorage.removeItem("user");
@@ -35,7 +40,7 @@ axiosInstance.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;

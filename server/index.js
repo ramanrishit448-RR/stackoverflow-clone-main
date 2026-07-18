@@ -19,7 +19,12 @@ const app = express();
 dotenv.config();
 
 const allowAllOrigins = process.env.ALLOW_ALL_CORS === "true";
-const allowedOrigins = (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || process.env.FRONTEND_URL || "")
+const allowedOrigins = (
+  process.env.CORS_ORIGINS ||
+  process.env.CORS_ORIGIN ||
+  process.env.FRONTEND_URL ||
+  ""
+)
   .split(",")
   .map((value) => value.trim())
   .filter(Boolean);
@@ -27,25 +32,31 @@ const allowedOrigins = (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || p
 const isAllowedOrigin = (origin) => {
   if (!origin) return true;
   if (allowAllOrigins) return true;
-  return allowedOrigins.some((allowedOrigin) => allowedOrigin === origin || allowedOrigin === "*") ||
+  return (
+    allowedOrigins.some(
+      (allowedOrigin) => allowedOrigin === origin || allowedOrigin === "*",
+    ) ||
     origin.includes("localhost") ||
     origin.includes("127.0.0.1") ||
     origin.includes("vercel.app") ||
     origin.includes("netlify.app") ||
-    origin.includes("pages.dev");
+    origin.includes("pages.dev")
+  );
 };
 
 app.use(express.json({ limit: "30mb", extended: true }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
-app.use(cors({
-  origin: function (origin, callback) {
-    if (isAllowedOrigin(origin)) {
-      return callback(null, true);
-    }
-    callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  }),
+);
 
 // Middleware to ensure Database connection on serverless requests
 let isConnected = false;
