@@ -1,6 +1,10 @@
 {
   "name": "stackoverflow-clone",
   "version": "1.0.0",
+  "scripts": {
+    "build": "cd stack && npm install && npm run build",
+    "start": "cd stack && npm start"
+  },
   "dependencies": {
     "next": "^16.2.10"
   }
