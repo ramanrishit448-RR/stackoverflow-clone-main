@@ -84,6 +84,13 @@ app.use(async (req, res, next) => {
   next();
 });
 
+app.get("/", (req, res) => {
+  res.json({
+    status: "✅ Backend is running",
+    message: "Stackoverflow clone API",
+  });
+});
+
 app.get("/api-health", (req, res) => {
   res.send("Stackoverflow clone is running perfect");
 });
