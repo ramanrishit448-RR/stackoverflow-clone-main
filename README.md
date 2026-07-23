@@ -2,7 +2,7 @@
 
 ## Elevance Skills Internship Project
 
-This repository contains a full-stack StackOverflow clone, built and refined as part of the **Elevance Skills** internship program. It comprises a server-side API (Express & Node.js) and a client-side Next.js web application.
+This repository contains a Code Sharing Platflom inspired by Stack Overflow, built and refined as part of the **Elevance Skills** internship program. It comprises a server-side API (Express & Node.js) and a client-side Next.js web application.
 
 ---
 
